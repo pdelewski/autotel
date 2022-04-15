@@ -35,8 +35,10 @@ func main() {
 	{
 		ctx := context.Background()
 		_, span := otel.Tracer("fib").Start(ctx, "before Fib")
+		defer func() {
+			span.End()
+		}()
 		fmt.Println(Fibonacci(10))
-		span.End()
 	}
 
 }
