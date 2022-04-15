@@ -14,6 +14,19 @@ func usage() {
 	fmt.Println("\nusage autotel [path to go project]")
 }
 
+func isPath(callGraph map[string]string, current string, goal string) bool {
+	if current == goal {
+		return true
+	}
+	value, ok := callGraph[current]
+	if ok {
+		if isPath(callGraph, value, goal) {
+			return true
+		}
+	}
+	return false
+}
+
 func searchFiles(root string) []string {
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -102,26 +115,51 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 			// check if it's root function or
 			// one of function in call graph
 			// and emit proper ast nodes
-			newCallStmt := &ast.ExprStmt{
-				X: &ast.CallExpr{
-					Fun: &ast.SelectorExpr{
-						X: &ast.Ident{
-							Name: "fmt",
+			for _, root := range rootFunctions {
+				if isPath(callgraph, x.Name.Name, root) && x.Name.Name != root {
+					fmt.Printf("\nInstrument child : %s %s\n", x.Name.Name, root)
+					newCallStmt := &ast.ExprStmt{
+						X: &ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X: &ast.Ident{
+									Name: "fmt",
+								},
+								Sel: &ast.Ident{
+									Name: "Println",
+								},
+							},
+							Args: []ast.Expr{
+								&ast.BasicLit{
+									Kind:  token.STRING,
+									Value: `"child instrumentation"`,
+								},
+							},
 						},
-						Sel: &ast.Ident{
-							Name: "Println",
+					}
+					x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
+				} else {
+					newCallStmt := &ast.ExprStmt{
+						X: &ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X: &ast.Ident{
+									Name: "fmt",
+								},
+								Sel: &ast.Ident{
+									Name: "Println",
+								},
+							},
+							Args: []ast.Expr{
+								&ast.BasicLit{
+									Kind:  token.STRING,
+									Value: `"root instrumentation"`,
+								},
+							},
 						},
-					},
-					Args: []ast.Expr{
-						&ast.BasicLit{
-							Kind:  token.STRING,
-							Value: `"instrumentation"`,
-						},
-					},
-				},
+					}
+					x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
+				}
 			}
 
-			x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
 		}
 		return true
 	})
