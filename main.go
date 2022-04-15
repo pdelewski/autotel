@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"os"
 	"path/filepath"
@@ -98,9 +99,34 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 				fmt.Println(id)
 			}
 		case *ast.FuncDecl:
+			// check if it's root function or
+			// one of function in call graph
+			// and emit proper ast nodes
+			newCallStmt := &ast.ExprStmt{
+				X: &ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X: &ast.Ident{
+							Name: "fmt",
+						},
+						Sel: &ast.Ident{
+							Name: "Println",
+						},
+					},
+					Args: []ast.Expr{
+						&ast.BasicLit{
+							Kind:  token.STRING,
+							Value: `"instrumentation"`,
+						},
+					},
+				},
+			}
+
+			x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
 		}
 		return true
 	})
+	fmt.Println("Instrumentation result:")
+	printer.Fprint(os.Stdout, fset, node)
 }
 
 func parsePath(root string) {
