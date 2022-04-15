@@ -125,8 +125,12 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 		}
 		return true
 	})
+
+	out, err := os.Create(file + ".out")
+	defer out.Close()
+
 	fmt.Println("Instrumentation result:")
-	printer.Fprint(os.Stdout, fset, node)
+	printer.Fprint(out, fset, node)
 }
 
 func parsePath(root string) {
