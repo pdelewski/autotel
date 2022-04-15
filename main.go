@@ -176,13 +176,16 @@ func parsePath(root string) {
 	files := searchFiles(root)
 
 	var rootFunctions []string
-	var backwardCallGraph map[string]string
+	backwardCallGraph := make(map[string]string)
 
 	for _, file := range files {
 		rootFunctions = append(rootFunctions, findRootFunctions(file)...)
 	}
 	for _, file := range files {
-		backwardCallGraph = buildCallGraph(file)
+		callGraphInstance := buildCallGraph(file)
+		for key, value := range callGraphInstance {
+			backwardCallGraph[key] = value
+		}
 	}
 	fmt.Println("Root Functions:")
 	for _, fun := range rootFunctions {
