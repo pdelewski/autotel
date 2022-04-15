@@ -14,10 +14,20 @@
 
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+
+	otel "go.opentelemetry.io/otel"
+)
 
 // Fibonacci returns the n-th fibonacci number.
 func Fibonacci(n uint) (uint64, error) {
+	ctx := context.Background()
+	_, span := otel.Tracer("fib").Start(ctx, "Fib")
+	defer func() {
+		span.End()
+	}()
 	if n <= 1 {
 		return uint64(n), nil
 	}
