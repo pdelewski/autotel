@@ -27,40 +27,6 @@ func searchFiles(root string) []string {
 	return files
 }
 
-func instrument(file string) {
-	fmt.Println("instrumentation", file)
-}
-
-func Parse(file string) {
-	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
-	if err != nil {
-		panic(err)
-	}
-	for _, f := range node.Decls {
-		fn, ok := f.(*ast.FuncDecl)
-		if !ok {
-			continue
-		}
-		fmt.Println(fn.Name.Name)
-	}
-	var currentFun string
-	ast.Inspect(node, func(n ast.Node) bool {
-		// Find Functions
-		fn, ok := n.(*ast.FuncDecl)
-		if ok {
-			currentFun = fn.Name.Name
-			return true
-		}
-		funcCall, ok := n.(*ast.CallExpr)
-		if ok {
-			fmt.Println("FuncCall: ", funcCall.Fun)
-			fmt.Println("child of: ", currentFun)
-		}
-		return true
-	})
-}
-
 func findRootFunctions(file string) []string {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
@@ -98,21 +64,64 @@ func findRootFunctions(file string) []string {
 	return rootFunctions
 }
 
+func buildCallGraph(file string) map[string]string {
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range node.Decls {
+		fn, ok := f.(*ast.FuncDecl)
+		if !ok {
+			continue
+		}
+		fmt.Println(fn.Name.Name)
+	}
+
+	currentFun := "nil"
+	backwardCallGraph := make(map[string]string)
+
+	ast.Inspect(node, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.CallExpr:
+			id, ok := x.Fun.(*ast.Ident)
+			if ok {
+				backwardCallGraph[id.Name] = currentFun
+			}
+		case *ast.FuncDecl:
+			currentFun = x.Name.Name
+		}
+		return true
+	})
+
+	return backwardCallGraph
+}
+
 func parsePath(root string) {
 	fmt.Println("parsing", root)
 	files := searchFiles(root)
 	for _, file := range files {
 		fmt.Println("pass 1", file)
 	}
+
 	var rootFunctions []string
+	var backwardCallGraph map[string]string
+
 	for _, file := range files {
-		instrument(file)
 		rootFunctions = append(rootFunctions, findRootFunctions(file)...)
 	}
-	fmt.Println("Root Functions:")
-	for _, file := range rootFunctions {
-		fmt.Println(file)
+	for _, file := range files {
+		backwardCallGraph = buildCallGraph(file)
 	}
+	fmt.Println("Root Functions:")
+	for _, fun := range rootFunctions {
+		fmt.Println(fun)
+	}
+	fmt.Println("BackwardCallGraph")
+	for k, v := range backwardCallGraph {
+		fmt.Println(k, v)
+	}
+
 }
 
 // Parsing algorithm works as follows. It goes through all function
