@@ -16,8 +16,11 @@ package main
 
 import (
 	"fmt"
+
+	"sumologic.com/autotel/rtlib"
 )
 
 func main() {
+	rtlib.SumoAutoInstrument()
 	fmt.Println(Fibonacci(10))
 }

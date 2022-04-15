@@ -67,3 +67,7 @@ func NewResource() *resource.Resource {
 	)
 	return r
 }
+
+func SumoAutoInstrument() {
+
+}
