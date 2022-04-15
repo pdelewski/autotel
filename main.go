@@ -33,13 +33,7 @@ func findRootFunctions(file string) []string {
 	if err != nil {
 		panic(err)
 	}
-	for _, f := range node.Decls {
-		fn, ok := f.(*ast.FuncDecl)
-		if !ok {
-			continue
-		}
-		fmt.Println(fn.Name.Name)
-	}
+
 	var currentFun string
 	var rootFunctions []string
 
@@ -70,13 +64,6 @@ func buildCallGraph(file string) map[string]string {
 	if err != nil {
 		panic(err)
 	}
-	for _, f := range node.Decls {
-		fn, ok := f.(*ast.FuncDecl)
-		if !ok {
-			continue
-		}
-		fmt.Println(fn.Name.Name)
-	}
 
 	currentFun := "nil"
 	backwardCallGraph := make(map[string]string)
@@ -97,12 +84,28 @@ func buildCallGraph(file string) map[string]string {
 	return backwardCallGraph
 }
 
+func instrument(file string, callgraph map[string]string, rootFunctions []string) {
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	if err != nil {
+		panic(err)
+	}
+	ast.Inspect(node, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.CallExpr:
+			id, ok := x.Fun.(*ast.Ident)
+			if ok {
+				fmt.Println(id)
+			}
+		case *ast.FuncDecl:
+		}
+		return true
+	})
+}
+
 func parsePath(root string) {
 	fmt.Println("parsing", root)
 	files := searchFiles(root)
-	for _, file := range files {
-		fmt.Println("pass 1", file)
-	}
 
 	var rootFunctions []string
 	var backwardCallGraph map[string]string
@@ -117,11 +120,14 @@ func parsePath(root string) {
 	for _, fun := range rootFunctions {
 		fmt.Println(fun)
 	}
-	fmt.Println("BackwardCallGraph")
+	fmt.Println("BackwardCallGraph:")
 	for k, v := range backwardCallGraph {
 		fmt.Println(k, v)
 	}
-
+	fmt.Println("Instrument:")
+	for _, file := range files {
+		instrument(file, backwardCallGraph, rootFunctions)
+	}
 }
 
 // Parsing algorithm works as follows. It goes through all function
