@@ -8,6 +8,8 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+
+	"golang.org/x/tools/go/ast/astutil"
 )
 
 func usage() {
@@ -104,6 +106,8 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 	if err != nil {
 		panic(err)
 	}
+	astutil.AddImport(fset, node, "context")
+	astutil.AddNamedImport(fset, node, "otel", "go.opentelemetry.io/otel")
 	ast.Inspect(node, func(n ast.Node) bool {
 		switch x := n.(type) {
 		case *ast.CallExpr:
