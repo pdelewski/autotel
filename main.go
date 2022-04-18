@@ -122,7 +122,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 			for _, root := range rootFunctions {
 				if isPath(callgraph, x.Name.Name, root) && x.Name.Name != root {
 					fmt.Printf("\nInstrument child : %s %s\n", x.Name.Name, root)
-					newCallStmt := &ast.ExprStmt{
+					s1 := &ast.ExprStmt{
 						X: &ast.CallExpr{
 							Fun: &ast.SelectorExpr{
 								X: &ast.Ident{
@@ -140,7 +140,107 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 							},
 						},
 					}
-					x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
+					s2 := &ast.AssignStmt{
+						Lhs: []ast.Expr{
+							&ast.Ident{
+								Name: "ctx",
+							},
+						},
+						Tok: token.DEFINE,
+						Rhs: []ast.Expr{
+							&ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X: &ast.Ident{
+										Name: "context",
+									},
+									Sel: &ast.Ident{
+										Name: "Background",
+									},
+								},
+								Lparen:   52,
+								Ellipsis: 0,
+							},
+						},
+					}
+					s3 := &ast.AssignStmt{
+						Lhs: []ast.Expr{
+							&ast.Ident{
+								Name: "_",
+							},
+							&ast.Ident{
+								Name: "span",
+							},
+						},
+						Tok: token.DEFINE,
+						Rhs: []ast.Expr{
+							&ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X: &ast.CallExpr{
+										Fun: &ast.SelectorExpr{
+											X: &ast.Ident{
+												Name: "otel",
+											},
+											Sel: &ast.Ident{
+												Name: "Tracer",
+											},
+										},
+										Lparen: 50,
+										Args: []ast.Expr{
+											&ast.Ident{
+												Name: `"fib"`,
+											},
+										},
+										Ellipsis: 0,
+									},
+									Sel: &ast.Ident{
+										Name: "Start",
+									},
+								},
+								Lparen: 62,
+								Args: []ast.Expr{
+									&ast.Ident{
+										Name: "ctx",
+									},
+									&ast.Ident{
+										Name: `"fib"`,
+									},
+								},
+								Ellipsis: 0,
+							},
+						},
+					}
+					s4 := &ast.DeferStmt{
+						Defer: 27,
+						Call: &ast.CallExpr{
+							Fun: &ast.FuncLit{
+								Type: &ast.FuncType{
+									Func:   33,
+									Params: &ast.FieldList{},
+								},
+								Body: &ast.BlockStmt{
+									List: []ast.Stmt{
+										&ast.ExprStmt{
+											X: &ast.CallExpr{
+												Fun: &ast.SelectorExpr{
+													X: &ast.Ident{
+														Name: "span",
+													},
+													Sel: &ast.Ident{
+														Name: "End",
+													},
+												},
+												Lparen:   49,
+												Ellipsis: 0,
+											},
+										},
+									},
+								},
+							},
+							Lparen:   52,
+							Ellipsis: 0,
+						},
+					}
+					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4}, x.Body.List...)
 				} else {
 					s1 := &ast.ExprStmt{
 						X: &ast.CallExpr{
@@ -356,7 +456,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 										Lparen: 50,
 										Args: []ast.Expr{
 											&ast.Ident{
-												Name: "main",
+												Name: `"main"`,
 											},
 										},
 										Ellipsis: 0,
@@ -371,7 +471,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 										Name: "ctx",
 									},
 									&ast.Ident{
-										Name: "main",
+										Name: `"main"`,
 									},
 								},
 								Ellipsis: 0,
