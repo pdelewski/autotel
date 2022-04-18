@@ -285,7 +285,131 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 								Ellipsis: 0,
 							},
 						}
-					x.Body.List = append([]ast.Stmt{s1, s2, s3}, x.Body.List...)
+					s4 := &ast.ExprStmt{
+						X: &ast.CallExpr{
+							Fun: &ast.SelectorExpr{
+								X: &ast.Ident{
+									Name: "otel",
+								},
+								Sel: &ast.Ident{
+									Name: "SetTracerProvider",
+								},
+							},
+							Lparen: 49,
+							Args: []ast.Expr{
+								&ast.SelectorExpr{
+									X: &ast.Ident{
+										Name: "ts",
+									},
+									Sel: &ast.Ident{
+										Name: "Tp",
+									},
+								},
+							},
+							Ellipsis: 0,
+						},
+					}
+					s5 := &ast.AssignStmt{
+						Lhs: []ast.Expr{
+							&ast.Ident{
+								Name: "ctx",
+							},
+						},
+						Tok: token.DEFINE,
+						Rhs: []ast.Expr{
+							&ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X: &ast.Ident{
+										Name: "context",
+									},
+									Sel: &ast.Ident{
+										Name: "Background",
+									},
+								},
+								Lparen:   52,
+								Ellipsis: 0,
+							},
+						},
+					}
+					s6 := &ast.AssignStmt{
+						Lhs: []ast.Expr{
+							&ast.Ident{
+								Name: "_",
+							},
+							&ast.Ident{
+								Name: "span",
+							},
+						},
+						Tok: token.DEFINE,
+						Rhs: []ast.Expr{
+							&ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X: &ast.CallExpr{
+										Fun: &ast.SelectorExpr{
+											X: &ast.Ident{
+												Name: "otel",
+											},
+											Sel: &ast.Ident{
+												Name: "Tracer",
+											},
+										},
+										Lparen: 50,
+										Args: []ast.Expr{
+											&ast.Ident{
+												Name: "main",
+											},
+										},
+										Ellipsis: 0,
+									},
+									Sel: &ast.Ident{
+										Name: "Start",
+									},
+								},
+								Lparen: 62,
+								Args: []ast.Expr{
+									&ast.Ident{
+										Name: "ctx",
+									},
+									&ast.Ident{
+										Name: "main",
+									},
+								},
+								Ellipsis: 0,
+							},
+						},
+					}
+					s7 := &ast.DeferStmt{
+						Defer: 27,
+						Call: &ast.CallExpr{
+							Fun: &ast.FuncLit{
+								Type: &ast.FuncType{
+									Func:   33,
+									Params: &ast.FieldList{},
+								},
+								Body: &ast.BlockStmt{
+									List: []ast.Stmt{
+										&ast.ExprStmt{
+											X: &ast.CallExpr{
+												Fun: &ast.SelectorExpr{
+													X: &ast.Ident{
+														Name: "span",
+													},
+													Sel: &ast.Ident{
+														Name: "End",
+													},
+												},
+												Lparen:   49,
+												Ellipsis: 0,
+											},
+										},
+									},
+								},
+							},
+							Lparen:   52,
+							Ellipsis: 0,
+						},
+					}
+					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4, s5, s6, s7}, x.Body.List...)
 				}
 			}
 
