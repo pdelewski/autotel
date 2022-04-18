@@ -142,7 +142,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 					}
 					x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
 				} else {
-					newCallStmt := &ast.ExprStmt{
+					s1 := &ast.ExprStmt{
 						X: &ast.CallExpr{
 							Fun: &ast.SelectorExpr{
 								X: &ast.Ident{
@@ -160,7 +160,132 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 							},
 						},
 					}
-					x.Body.List = append([]ast.Stmt{newCallStmt}, x.Body.List...)
+
+					s2 :=
+						&ast.AssignStmt{
+							Lhs: []ast.Expr{
+								&ast.Ident{
+									Name: "ts",
+								},
+							},
+							Tok: token.DEFINE,
+
+							Rhs: []ast.Expr{
+								&ast.CallExpr{
+									Fun: &ast.SelectorExpr{
+										X: &ast.Ident{
+											Name: "rtlib",
+										},
+										Sel: &ast.Ident{
+											Name: "NewTracingState",
+										},
+									},
+									Lparen:   54,
+									Ellipsis: 0,
+								},
+							},
+						}
+					s3 :=
+						&ast.DeferStmt{
+							Defer: 27,
+							Call: &ast.CallExpr{
+								Fun: &ast.FuncLit{
+									Type: &ast.FuncType{
+										Func:   33,
+										Params: &ast.FieldList{},
+									},
+									Body: &ast.BlockStmt{
+										List: []ast.Stmt{
+											&ast.IfStmt{
+												If: 41,
+												Init: &ast.AssignStmt{
+													Lhs: []ast.Expr{
+														&ast.Ident{
+															Name: "err",
+														},
+													},
+													Tok: token.DEFINE,
+													Rhs: []ast.Expr{
+														&ast.CallExpr{
+															Fun: &ast.SelectorExpr{
+																X: &ast.SelectorExpr{
+																	X: &ast.Ident{
+																		Name: "ts",
+																	},
+																	Sel: &ast.Ident{
+																		Name: "Tp",
+																	},
+																},
+																Sel: &ast.Ident{
+																	Name: "Shutdown",
+																},
+															},
+															Lparen: 65,
+															Args: []ast.Expr{
+																&ast.CallExpr{
+																	Fun: &ast.SelectorExpr{
+																		X: &ast.Ident{
+																			Name: "context",
+																		},
+																		Sel: &ast.Ident{
+																			Name: "Backgroud",
+																		},
+																	},
+																	Lparen:   83,
+																	Ellipsis: 0,
+																},
+															},
+															Ellipsis: 0,
+														},
+													},
+												},
+												Cond: &ast.BinaryExpr{
+													X: &ast.Ident{
+														Name: "err",
+													},
+													OpPos: 92,
+													Op:    token.NEQ,
+													Y: &ast.Ident{
+														Name: "nil",
+													},
+												},
+												Body: &ast.BlockStmt{
+													List: []ast.Stmt{
+														&ast.ExprStmt{
+															X: &ast.CallExpr{
+																Fun: &ast.SelectorExpr{
+																	X: &ast.SelectorExpr{
+																		X: &ast.Ident{
+																			Name: "ts",
+																		},
+																		Sel: &ast.Ident{
+																			Name: "Logger",
+																		},
+																	},
+																	Sel: &ast.Ident{
+																		Name: "Fatal",
+																	},
+																},
+																Lparen: 115,
+																Args: []ast.Expr{
+																	&ast.Ident{
+																		Name: "err",
+																	},
+																},
+																Ellipsis: 0,
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								Lparen:   122,
+								Ellipsis: 0,
+							},
+						}
+					x.Body.List = append([]ast.Stmt{s1, s2, s3}, x.Body.List...)
 				}
 			}
 
