@@ -36,4 +36,35 @@ func main() {
 }
 ```
 
+Result after autotel invocation
+
+```
+package main
+
+import (
+	"fmt"
+	"context"
+
+	"sumologic.com/autotel/rtlib"
+	otel "go.opentelemetry.io/otel"
+)
+
+func main() {
+	fmt.Println("root instrumentation")
+	ts := rtlib.NewTracingState()
+	defer func() {
+		if err := ts.Tp.Shutdown(context.Backgroud()); err != nil {
+			ts.Logger.Fatal(err)
+		}
+	}()
+	otel.SetTracerProvider(ts.Tp)
+	ctx := context.Background()
+	_, span := otel.Tracer("main").Start(ctx, "main")
+	defer func() { span.End() }()
+
+	rtlib.SumoAutoInstrument()
+	fmt.Println(FibonacciHelper(10))
+}
+```
+
 We can imagine other methods to say what needs to be instrumented (by argument(s) passed to autotel or configuration file).
