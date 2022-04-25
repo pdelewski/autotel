@@ -187,7 +187,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 										Lparen: 50,
 										Args: []ast.Expr{
 											&ast.Ident{
-												Name: `"fib"`,
+												Name: `"` + x.Name.Name + `"`,
 											},
 										},
 										Ellipsis: 0,
@@ -202,7 +202,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 										Name: "ctx",
 									},
 									&ast.Ident{
-										Name: `"fib"`,
+										Name: `"` + x.Name.Name + `"`,
 									},
 								},
 								Ellipsis: 0,
@@ -456,7 +456,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 										Lparen: 50,
 										Args: []ast.Expr{
 											&ast.Ident{
-												Name: `"main"`,
+												Name: `"` + x.Name.Name + `"`,
 											},
 										},
 										Ellipsis: 0,
@@ -471,7 +471,7 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 										Name: "ctx",
 									},
 									&ast.Ident{
-										Name: `"main"`,
+										Name: `"` + x.Name.Name + `"`,
 									},
 								},
 								Ellipsis: 0,
