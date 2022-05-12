@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -21,18 +20,12 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 	astutil.AddNamedImport(fset, node, "otel", "go.opentelemetry.io/otel")
 	ast.Inspect(node, func(n ast.Node) bool {
 		switch x := n.(type) {
-		case *ast.CallExpr:
-			id, ok := x.Fun.(*ast.Ident)
-			if ok {
-				fmt.Println(id)
-			}
 		case *ast.FuncDecl:
 			// check if it's root function or
 			// one of function in call graph
 			// and emit proper ast nodes
 			for _, root := range rootFunctions {
 				if isPath(callgraph, x.Name.Name, root) && x.Name.Name != root {
-					fmt.Printf("\nInstrument child : %s %s\n", x.Name.Name, root)
 					s1 := &ast.ExprStmt{
 						X: &ast.CallExpr{
 							Fun: &ast.SelectorExpr{
@@ -431,6 +424,5 @@ func instrument(file string, callgraph map[string]string, rootFunctions []string
 	out, err := os.Create(file + ".out")
 	defer out.Close()
 
-	fmt.Println("Instrumentation result:")
 	printer.Fprint(out, fset, node)
 }

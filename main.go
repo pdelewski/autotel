@@ -10,7 +10,11 @@ import (
 )
 
 func usage() {
-	fmt.Println("\nusage autotel [path to go project]")
+	fmt.Println("\nusage autotel --command [path to go project]")
+	fmt.Println("\tcommand:")
+	fmt.Println("\t\tinject          (injects open telemetry calls into project code)")
+	fmt.Println("\t\tcfg             (dumps control flow graph)")
+	fmt.Println("\t\trootfunctions   (dumps root functions)")
 }
 
 func isPath(callGraph map[string]string, current string, goal string) bool {
@@ -98,7 +102,6 @@ func buildCallGraph(file string) map[string]string {
 }
 
 func parsePath(root string) {
-	fmt.Println("parsing", root)
 	files := searchFiles(root)
 
 	var rootFunctions []string
@@ -113,15 +116,6 @@ func parsePath(root string) {
 			backwardCallGraph[key] = value
 		}
 	}
-	fmt.Println("Root Functions:")
-	for _, fun := range rootFunctions {
-		fmt.Println(fun)
-	}
-	fmt.Println("BackwardCallGraph:")
-	for k, v := range backwardCallGraph {
-		fmt.Println(k, v)
-	}
-	fmt.Println("Instrument:")
 	for _, file := range files {
 		instrument(file, backwardCallGraph, rootFunctions)
 	}
@@ -135,10 +129,36 @@ func parsePath(root string) {
 func main() {
 	fmt.Println("autotel compiler")
 	args := len(os.Args)
-	if args != 2 {
+	if args < 3 {
 		usage()
 		return
 	}
-	parsePath(os.Args[1])
+	if os.Args[1] == "--inject" {
+		parsePath(os.Args[2])
+		fmt.Println("\tinstrumentation done")
+	}
+	if os.Args[1] == "--cfg" {
+		files := searchFiles(os.Args[2])
+		backwardCallGraph := make(map[string]string)
+		for _, file := range files {
+			callGraphInstance := buildCallGraph(file)
+			for key, value := range callGraphInstance {
+				backwardCallGraph[key] = value
+			}
+		}
+		for k, v := range backwardCallGraph {
+			fmt.Printf("\n\t %s -> %s", k, v)
+		}
+	}
+	if os.Args[1] == "--rootfunctions" {
+		files := searchFiles(os.Args[2])
+		var rootFunctions []string
+		for _, file := range files {
+			rootFunctions = append(rootFunctions, findRootFunctions(file)...)
+		}
+		for _, fun := range rootFunctions {
+			fmt.Println("\t" + fun)
+		}
+	}
 
 }
