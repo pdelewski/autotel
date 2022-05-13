@@ -7,13 +7,15 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 func usage() {
 	fmt.Println("\nusage autotel --command [path to go project]")
 	fmt.Println("\tcommand:")
 	fmt.Println("\t\tinject          (injects open telemetry calls into project code)")
-	fmt.Println("\t\tcfg             (dumps control flow graph)")
+	fmt.Println("\t\tdumpcfg         (dumps control flow graph)")
+	fmt.Println("\t\tgencfg          (generates json representation of control flow graph)")
 	fmt.Println("\t\trootfunctions   (dumps root functions)")
 }
 
@@ -121,6 +123,61 @@ func parsePath(root string) {
 	}
 }
 
+// var callgraph = {
+//     nodes: [
+//         { data: { id: 'fun1' } },
+//         { data: { id: 'fun2' } },
+// 		],
+//     edges: [
+//         { data: { id: 'e1', source: 'fun1', target: 'fun2' } },
+//     ]
+// };
+
+func generatecfg(callgraph map[string]string) {
+	functions := make(map[string]bool, 0)
+	for k, v := range callgraph {
+		if functions[k] == false {
+			functions[k] = true
+		}
+		if functions[v] == false {
+			functions[v] = true
+		}
+	}
+	for f := range functions {
+		fmt.Println(f)
+	}
+	out, err := os.Create("./ui/callgraph.js")
+	defer out.Close()
+	if err != nil {
+		return
+	}
+	out.WriteString("var callgraph = {")
+	out.WriteString("\n\tnodes: [")
+	for f := range functions {
+		out.WriteString("\n\t\t { data: { id: '")
+		out.WriteString(f)
+		out.WriteString("' } },")
+	}
+	out.WriteString("\n\t],")
+	out.WriteString("\n\tedges: [")
+	edgeCounter := 0
+	for k, v := range callgraph {
+		out.WriteString("\n\t\t { data: { id: '")
+		out.WriteString("e" + strconv.Itoa(edgeCounter))
+		out.WriteString("', ")
+		out.WriteString("source: '")
+		out.WriteString(v)
+		out.WriteString("', ")
+		out.WriteString("target: '")
+		out.WriteString(k)
+		out.WriteString("' ")
+		out.WriteString("} },")
+		edgeCounter++
+	}
+	out.WriteString("\n\t]")
+	out.WriteString("\n};")
+}
+
 // Parsing algorithm works as follows. It goes through all function
 // decls and infer function bodies to find call to SumoAutoInstrument
 // A parent function of this call will become root of instrumentation
@@ -137,7 +194,7 @@ func main() {
 		parsePath(os.Args[2])
 		fmt.Println("\tinstrumentation done")
 	}
-	if os.Args[1] == "--cfg" {
+	if os.Args[1] == "--dumpcfg" {
 		files := searchFiles(os.Args[2])
 		backwardCallGraph := make(map[string]string)
 		for _, file := range files {
@@ -150,6 +207,17 @@ func main() {
 			fmt.Print("\n\t", k)
 			fmt.Print(" -> ", v)
 		}
+	}
+	if os.Args[1] == "--gencfg" {
+		files := searchFiles(os.Args[2])
+		backwardCallGraph := make(map[string]string)
+		for _, file := range files {
+			callGraphInstance := buildCallGraph(file)
+			for key, value := range callGraphInstance {
+				backwardCallGraph[key] = value
+			}
+		}
+		generatecfg(backwardCallGraph)
 	}
 	if os.Args[1] == "--rootfunctions" {
 		files := searchFiles(os.Args[2])
