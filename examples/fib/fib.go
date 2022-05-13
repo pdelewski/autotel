@@ -16,6 +16,10 @@ package main
 
 import "fmt"
 
+func FibonacciHelper(n uint) (uint64, error) {
+  return Fibonacci(n)
+}
+
 // Fibonacci returns the n-th fibonacci number.
 func Fibonacci(n uint) (uint64, error) {
 	if n <= 1 {

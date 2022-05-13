@@ -1,5 +1,4 @@
 $(function() {
-
     var cy = cytoscape({
         container: document.getElementById('cy'),
         boxSelectionEnabled : true,
@@ -35,19 +34,7 @@ $(function() {
                 }
             },
         ],
-        elements: {
-            nodes: [
-                { data: { id: 'main' } },
-                { data: { id: 'FibonacciHelper' } },
-                { data: { id: 'Fibonacci' } }
-                
-
-            ],
-            edges: [
-                { data: { id: 'e1', source: 'main', target: 'FibonacciHelper' } },
-                { data: { id: 'e2', source: 'FibonacciHelper', target: 'Fibonacci' } }                      
-            ]
-        },
+        elements: callgraph,
         layout: {
             name: 'breadthfirst',
             directed: true,

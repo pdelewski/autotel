@@ -147,7 +147,8 @@ func main() {
 			}
 		}
 		for k, v := range backwardCallGraph {
-			fmt.Printf("\n\t %s -> %s", k, v)
+			fmt.Print("\n\t", k)
+			fmt.Print(" -> ", v)
 		}
 	}
 	if os.Args[1] == "--rootfunctions" {

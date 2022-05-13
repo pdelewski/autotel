@@ -22,5 +22,5 @@ import (
 
 func main() {
 	rtlib.SumoAutoInstrument()
-	fmt.Println(Fibonacci(10))
+	fmt.Println(FibonacciHelper(10))
 }
