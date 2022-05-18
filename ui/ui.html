@@ -12,6 +12,8 @@
 
     <script src="cytoscape.js"></script>
     <script src="cytoscape-context-menus.js"></script>
+    <script src="dagre.min.js"></script>
+    <script src="cytoscape-dagre.js"></script>
     <script type="text/javascript" src="callgraph.js"></script>
     <style>
       body {
@@ -73,7 +75,7 @@
             },
         ],
           layout: {
-            name: 'breadthfirst'
+            name: 'dagre'
           },
 
           elements: callgraph,
@@ -119,7 +121,9 @@
             },
           ]
         });
+        cy.nodes().style({"font-size": 5})  
       });
+  
     </script>
   </head>
 
