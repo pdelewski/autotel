@@ -43,6 +43,18 @@ $(function() {
             fit: true
         }
     });
-    cy.on('cxttap', "node", function(event) { alert("right click on node");});
-    cy.on('cxttap', "edge", function(event) { alert("right click on edge");});
+    cy.on('tap', "node", function(event) { 
+      var typeIds = cy.elements('node:selected');
+      alert(typeIds[1].id());
+    });
+    
+    //cy.on('cxttap', "edge", function(event) { alert("right click on edge");});
+    var n1 = cy.$('#main').successors().nodes().size();
+    cy.$('#main').select();
+    var s = cy.$('#main').successors().nodes().select();
+    do {
+        n1 = n1.successors().nodes().size();
+        s = s.successors().nodes().select();
+    } while (n1 > 0)
+    //alert(cy.$('#Fibonacci').successors().nodes().size());
 });

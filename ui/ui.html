@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+
+<html>
+
+  <head>
+    <title>Autotel UI</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+    <link href="cytoscape-context-menus.css" rel="stylesheet" type="text/css" />     
+
+    <script src="cytoscape.js"></script>
+    <script src="cytoscape-context-menus.js"></script>
+    <script type="text/javascript" src="callgraph.js"></script>
+    <style>
+      body {
+        font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+        font-size: 14px;
+      }
+
+      #cy {
+      height: 80%;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      top: 200;
+}
+
+      h1 {
+        opacity: 0.5;
+        font-size: 1em;
+        font-weight: bold;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+
+        var cy = window.cy = cytoscape({
+          container: document.getElementById('cy'),
+
+          style: [
+            {
+                selector: 'node',
+                css: {
+                    width: 50,
+                    height: 50,
+                    'background-color':'#61bffc',
+                    content: 'data(id)',
+                    'text-valign' : 'center',
+                    'text-halign' : 'center',
+                    shape: 'rectangle',
+                    
+                }
+            },
+            {
+                selector: "edge",
+                css: {
+                    "curve-style": "bezier",
+                    "control-point-step-size": 20,
+                    "target-arrow-shape": "triangle"
+                }
+            },
+            {
+                selector: ':selected',
+                style: {
+                  'background-color': 'red',
+                  'line-color': 'black',
+                  'target-arrow-color': 'black',
+                  'source-arrow-color': 'black',
+                }
+            },
+        ],
+          layout: {
+            name: 'breadthfirst'
+          },
+
+          elements: callgraph,
+        }).on('cxttap', function(event) {
+
+        });
+
+        var allSelected = function (type) {
+          if (type == 'node') {
+            return cy.nodes().length == cy.nodes(':selected').length;
+          }
+          return false;
+        }
+
+        var contextMenu = cy.contextMenus({
+          menuItems: [         
+            {
+              id: 'inject-code',
+              content: 'inject open telemetry instrumentation',
+              coreAsWell: true,
+              selector: 'node',
+              onClickFunction: function (event) {
+              },
+              hasTrailingDivider: true
+            },
+            {
+              id: 'select-all-nodes',
+              content: 'select all nodes',
+              selector: 'node',
+              coreAsWell: true,
+              onClickFunction: function (event) {
+                cy.nodes().select();
+              },
+            },
+            {
+              id: 'select-child-nodes',
+              content: 'select child nodes',
+              selector: 'node',
+              
+              onClickFunction: function (event) {
+              },
+
+            },
+          ]
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>Autotel UI</h1>
+    <form name="functionSearch" action="" method="get">
+      Find function: <br>
+      <input type="text" name="inputbox" value="">
+      <input type="button" name="button" value="click" onclick="showData(this.form)">
+    </form>
+    <div id="cy"></div>
+
+  </body>
+
+</html>
