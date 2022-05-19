@@ -103,7 +103,7 @@ func buildCallGraph(file string) map[string]string {
 	return backwardCallGraph
 }
 
-func parsePath(root string) {
+func inject(root string) {
 	files := searchFiles(root)
 
 	var rootFunctions []string
@@ -191,7 +191,7 @@ func main() {
 		return
 	}
 	if os.Args[1] == "--inject" {
-		parsePath(os.Args[2])
+		inject(os.Args[2])
 		fmt.Println("\tinstrumentation done")
 	}
 	if os.Args[1] == "--dumpcfg" {
