@@ -1,4 +1,4 @@
-package main
+package autotellib
 
 import (
 	"go/ast"
@@ -10,7 +10,20 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func instrument(file string, callgraph map[string]string, rootFunctions []string) {
+func isPath(callGraph map[string]string, current string, goal string) bool {
+	if current == goal {
+		return true
+	}
+	value, ok := callGraph[current]
+	if ok {
+		if isPath(callGraph, value, goal) {
+			return true
+		}
+	}
+	return false
+}
+
+func Instrument(file string, callgraph map[string]string, rootFunctions []string) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
 	if err != nil {

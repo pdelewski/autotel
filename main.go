@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	alib "sumologic.com/autotellib"
 )
 
 func usage() {
@@ -20,19 +22,6 @@ func usage() {
 	fmt.Println("\t\tdumpcfg                                (dumps control flow graph)")
 	fmt.Println("\t\tgencfg                                 (generates json representation of control flow graph)")
 	fmt.Println("\t\trootfunctions                          (dumps root functions)")
-}
-
-func isPath(callGraph map[string]string, current string, goal string) bool {
-	if current == goal {
-		return true
-	}
-	value, ok := callGraph[current]
-	if ok {
-		if isPath(callGraph, value, goal) {
-			return true
-		}
-	}
-	return false
 }
 
 func searchFiles(root string) []string {
@@ -122,7 +111,7 @@ func inject(root string) {
 		}
 	}
 	for _, file := range files {
-		instrument(file, backwardCallGraph, rootFunctions)
+		alib.Instrument(file, backwardCallGraph, rootFunctions)
 	}
 }
 
@@ -238,7 +227,7 @@ func main() {
 		}
 		files := searchFiles(os.Args[3])
 		for _, file := range files {
-			instrument(file, backwardCallGraph, rootFunctions)
+			alib.Instrument(file, backwardCallGraph, rootFunctions)
 		}
 	}
 	if os.Args[1] == "--dumpcfg" {
