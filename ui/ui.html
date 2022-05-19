@@ -37,7 +37,15 @@
     </style>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
+        function httpPost(theUrl)
+        {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", theUrl, true);
+
+            xhr.setRequestHeader('Content-length', '0');
+            xhr.send('\nuint64 Fibonacci\nuint Fibonacci\nFibonacciHelper main\nFibonacci FibonacciHelper');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
 
         var cy = window.cy = cytoscape({
           container: document.getElementById('cy'),
@@ -98,6 +106,7 @@
               coreAsWell: true,
               selector: 'node',
               onClickFunction: function (event) {
+                httpPost('http://localhost:8090/inject')
               },
               hasTrailingDivider: true
             },
