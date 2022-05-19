@@ -126,6 +126,23 @@ func inject(root string) {
 	}
 }
 
+func inferRootFunctionsFromGraph(callgraph map[string]string) []string {
+	var allFunctions map[string]bool
+	var rootFunctions []string
+	allFunctions = make(map[string]bool)
+	for k, v := range callgraph {
+		allFunctions[k] = true
+		allFunctions[v] = true
+	}
+	for k, _ := range allFunctions {
+		_, exists := callgraph[k]
+		if !exists {
+			rootFunctions = append(rootFunctions, k)
+		}
+	}
+	return rootFunctions
+}
+
 // var callgraph = {
 //     nodes: [
 //         { data: { id: 'fun1' } },
@@ -206,12 +223,22 @@ func main() {
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
-
+		backwardCallGraph := make(map[string]string)
 		for scanner.Scan() {
 			line := scanner.Text()
 			keyValue := strings.Split(line, " ")
 			fmt.Print("\n\t", keyValue[0])
 			fmt.Print(" ", keyValue[1])
+
+			backwardCallGraph[keyValue[0]] = keyValue[1]
+		}
+		rootFunctions := inferRootFunctionsFromGraph(backwardCallGraph)
+		for _, v := range rootFunctions {
+			fmt.Println("\nroot:" + v)
+		}
+		files := searchFiles(os.Args[3])
+		for _, file := range files {
+			instrument(file, backwardCallGraph, rootFunctions)
 		}
 	}
 	if os.Args[1] == "--dumpcfg" {
