@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -8,15 +9,17 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 func usage() {
 	fmt.Println("\nusage autotel --command [path to go project]")
 	fmt.Println("\tcommand:")
-	fmt.Println("\t\tinject          (injects open telemetry calls into project code)")
-	fmt.Println("\t\tdumpcfg         (dumps control flow graph)")
-	fmt.Println("\t\tgencfg          (generates json representation of control flow graph)")
-	fmt.Println("\t\trootfunctions   (dumps root functions)")
+	fmt.Println("\t\tinject                                 (injects open telemetry calls into project code)")
+	fmt.Println("\t\tinject-using-graph graph-file          (injects open telemetry calls into project code using provided graph information)")
+	fmt.Println("\t\tdumpcfg                                (dumps control flow graph)")
+	fmt.Println("\t\tgencfg                                 (generates json representation of control flow graph)")
+	fmt.Println("\t\trootfunctions                          (dumps root functions)")
 }
 
 func isPath(callGraph map[string]string, current string, goal string) bool {
@@ -194,6 +197,23 @@ func main() {
 		inject(os.Args[2])
 		fmt.Println("\tinstrumentation done")
 	}
+	if os.Args[1] == "--inject-using-graph" {
+		graphFile := os.Args[2]
+		file, err := os.Open(graphFile)
+		if err != nil {
+			usage()
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			keyValue := strings.Split(line, " ")
+			fmt.Print("\n\t", keyValue[0])
+			fmt.Print(" ", keyValue[1])
+		}
+	}
 	if os.Args[1] == "--dumpcfg" {
 		files := searchFiles(os.Args[2])
 		backwardCallGraph := make(map[string]string)
@@ -203,9 +223,10 @@ func main() {
 				backwardCallGraph[key] = value
 			}
 		}
+		fmt.Println("\n\tchild parent")
 		for k, v := range backwardCallGraph {
 			fmt.Print("\n\t", k)
-			fmt.Print(" -> ", v)
+			fmt.Print(" ", v)
 		}
 	}
 	if os.Args[1] == "--gencfg" {
