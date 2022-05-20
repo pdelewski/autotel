@@ -31,8 +31,16 @@ func inject(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func main() {
+func usage() {
+	fmt.Println("\nusage autotelservice [path to go project]")
+}
 
+func main() {
+	args := len(os.Args)
+	if args < 2 {
+		usage()
+		return
+	}
 	files := alib.SearchFiles(os.Args[1])
 	backwardCallGraph := make(map[string]string)
 	for _, file := range files {
