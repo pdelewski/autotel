@@ -1,0 +1,9 @@
+/* Styles go here */
+body {background-color: rgb(192, 192, 192);}
+#cy {
+      height: 80%;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      top: 200;
+}

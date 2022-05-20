@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+    <script src="cytoscape.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.3.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="callgraph.js"></script>
+    <h1>Autotel callgraph view</h1>
+  </head>
+
+  <body>
+    <form name="myform" action="" method="get">
+      Search function name: <br>
+      <input type="text" name="inputbox" value="">
+      <input type="button" name="button" value="click" onclick="showData(this.form)">
+    </form>
+    <div id="cy"></div>
+  </body>
+</html>

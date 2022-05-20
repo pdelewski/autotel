@@ -31,6 +31,8 @@ func inject(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	http.HandleFunc("/inject", inject)
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
 
 	http.ListenAndServe(":8090", nil)
 }
