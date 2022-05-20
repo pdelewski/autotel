@@ -107,7 +107,7 @@ func InferRootFunctionsFromGraph(callgraph map[string]string) []string {
 //     ]
 // };
 
-func Generatecfg(callgraph map[string]string) {
+func Generatecfg(callgraph map[string]string, path string) {
 	functions := make(map[string]bool, 0)
 	for k, v := range callgraph {
 		if functions[k] == false {
@@ -120,7 +120,7 @@ func Generatecfg(callgraph map[string]string) {
 	for f := range functions {
 		fmt.Println(f)
 	}
-	out, err := os.Create("./ui/callgraph.js")
+	out, err := os.Create(path)
 	defer out.Close()
 	if err != nil {
 		return

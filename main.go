@@ -106,7 +106,7 @@ func main() {
 				backwardCallGraph[key] = value
 			}
 		}
-		alib.Generatecfg(backwardCallGraph)
+		alib.Generatecfg(backwardCallGraph, "./ui/callgraph.js")
 	}
 	if os.Args[1] == "--rootfunctions" {
 		files := alib.SearchFiles(os.Args[2])

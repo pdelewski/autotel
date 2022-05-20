@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+
+	alib "sumologic.com/autotellib"
 )
 
 func inject(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +32,16 @@ func inject(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	files := alib.SearchFiles(os.Args[1])
+	backwardCallGraph := make(map[string]string)
+	for _, file := range files {
+		callGraphInstance := alib.BuildCallGraph(file)
+		for key, value := range callGraphInstance {
+			backwardCallGraph[key] = value
+		}
+	}
+	alib.Generatecfg(backwardCallGraph, "./static/callgraph.js")
 
 	http.HandleFunc("/inject", inject)
 	fs := http.FileServer(http.Dir("./static"))
