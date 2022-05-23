@@ -23,6 +23,15 @@ func isPath(callGraph map[string]string, current string, goal string) bool {
 	return false
 }
 
+func Contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
+
 func Instrument(file string, callgraph map[string]string, rootFunctions []string) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
@@ -37,6 +46,13 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 			// check if it's root function or
 			// one of function in call graph
 			// and emit proper ast nodes
+			_, exists := callgraph[x.Name.Name]
+			if !exists {
+				if !Contains(rootFunctions, x.Name.Name) {
+					return false
+				}
+			}
+
 			for _, root := range rootFunctions {
 				if isPath(callgraph, x.Name.Name, root) && x.Name.Name != root {
 					s1 := &ast.ExprStmt{

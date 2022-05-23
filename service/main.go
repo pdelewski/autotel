@@ -31,6 +31,9 @@ func readGraphBody(graphFile string) {
 		backwardCallGraph[keyValue[0]] = keyValue[1]
 	}
 	rootFunctions := alib.InferRootFunctionsFromGraph(backwardCallGraph)
+	if len(rootFunctions) != 1 {
+		panic("more than one graph")
+	}
 	for _, v := range rootFunctions {
 		fmt.Println("\nroot:" + v)
 	}
