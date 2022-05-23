@@ -37,13 +37,14 @@
     </style>
 
     <script>
-        function httpPost(theUrl)
+        function httpPost(theUrl, streamedGraph)
         {
             let xhr = new XMLHttpRequest();
             xhr.open("POST", theUrl, true);
 
             xhr.setRequestHeader('Content-length', '0');
-            xhr.send('\nuint64 Fibonacci\nuint Fibonacci\nFibonacciHelper main\nFibonacci FibonacciHelper');
+            var body = streamedGraph.join('\n');
+            xhr.send(body);
         }
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -114,14 +115,11 @@
                   var preds = cy.$(node).predecessors();
                   res = preds.filter(item => selectedNodes.includes(item));
                   if (res.size() > 0) {
-                    var predsStr = node.id() + ":" + " " + res[0].id();
+                    var predsStr = node.id() + " " + res[0].id();
                     streamedGraph.push(predsStr);
                   }
                 });
-                streamedGraph.forEach(link => {
-                  alert(link);
-                });
-                httpPost('http://localhost:8090/inject');
+                httpPost('http://localhost:8090/inject', streamedGraph);
               },
               hasTrailingDivider: true
             },
