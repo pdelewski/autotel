@@ -154,16 +154,19 @@
         });
         cy.nodes().style({"font-size": 5})  
       });
-  
+      function showData(param) {
+        var fun = document.getElementById("search").value;
+        cy.$('#'+fun).select();
+      }
     </script>
   </head>
 
   <body>
     <h1>Autotel UI</h1>
     <form name="functionSearch" action="" method="get">
-      Find function: <br>
-      <input type="text" name="inputbox" value="">
-      <input type="button" name="button" value="click" onclick="showData(this.form)">
+      Function name: <br>
+      <input type="text" name="inputbox" value="" id="search">
+      <input type="button" name="button" value="search" onclick="showData(this.form)">
     </form>
     <div id="cy"></div>
 
