@@ -83,7 +83,8 @@
             },
         ],
           layout: {
-            name: 'dagre'
+            name: 'dagre',
+            directed: true,
           },
 
           elements: callgraph,
@@ -98,6 +99,7 @@
           return false;
         }
 
+
         var contextMenu = cy.contextMenus({
           menuItems: [         
             {
@@ -106,8 +108,18 @@
               coreAsWell: true,
               selector: 'node',
               onClickFunction: function (event) {
-                var typeIds = cy.elements('node:selected');
-                typeIds.forEach(node => {
+                var streamedGraph = [];
+                var selectedNodes = cy.elements('node:selected');
+                selectedNodes.forEach(node => {
+                  var preds = cy.$(node).predecessors();
+                  res = preds.filter(item => selectedNodes.includes(item));
+                  if (res.size() > 0) {
+                    var predsStr = node.id() + ":" + " " + res[0].id();
+                    streamedGraph.push(predsStr);
+                  }
+                });
+                streamedGraph.forEach(link => {
+                  alert(link);
                 });
                 httpPost('http://localhost:8090/inject');
               },
