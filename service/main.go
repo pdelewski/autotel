@@ -24,6 +24,18 @@ func inject(w http.ResponseWriter, r *http.Request) {
 
 	if len(bodyBytes) > 0 {
 		fmt.Println(string(bodyBytes))
+		f, err := os.Create("graphbody")
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		defer f.Close()
+
+		_, errSave := f.WriteString(string(bodyBytes))
+		if errSave != nil {
+			fmt.Println(errSave)
+		}
 	} else {
 		fmt.Printf("Body: No Body Supplied\n")
 	}
