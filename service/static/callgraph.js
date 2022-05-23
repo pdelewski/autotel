@@ -1,10 +1,10 @@
 var callgraph = {
 	nodes: [
+		 { data: { id: 'main' } },
 		 { data: { id: 'Fibonacci' } },
 		 { data: { id: 'FibonacciHelper' } },
 		 { data: { id: 'uint64' } },
 		 { data: { id: 'uint' } },
-		 { data: { id: 'main' } },
 	],
 	edges: [
 		 { data: { id: 'e0', source: 'Fibonacci', target: 'uint64' } },

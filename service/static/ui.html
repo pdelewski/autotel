@@ -138,6 +138,15 @@
               selector: 'node',
               
               onClickFunction: function (event) {
+                var selectedNodes = cy.elements('node:selected');
+                selectedNodes.forEach(node => {
+                  var succs = cy.$(node).successors();
+                  succs.forEach(succ => {
+                    if(succ.isNode()) {
+                      succ.select();
+                    }
+                  });
+                });
               },
 
             },
