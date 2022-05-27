@@ -1,4 +1,4 @@
-module sumologic.com/autotel/examples/referencefib
+module sumologic.com/autotel/examples/reference_fib_explicit_ctx
 
 go 1.18
 
