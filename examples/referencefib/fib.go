@@ -22,8 +22,7 @@ import (
 )
 
 // Fibonacci returns the n-th fibonacci number.
-func Fibonacci(n uint) (uint64, error) {
-	ctx := context.Background()
+func Fibonacci(n uint, ctx context.Context) (uint64, error) {
 	_, span := otel.Tracer("fib").Start(ctx, "Fib")
 	defer func() {
 		span.End()

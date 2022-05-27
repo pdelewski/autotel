@@ -32,10 +32,14 @@ func main() {
 
 	otel.SetTracerProvider(ts.Tp)
 	ctx := context.Background()
-	_, span := otel.Tracer("main").Start(ctx, "main")
+	newCtx, span := otel.Tracer("main").Start(ctx, "main")
 	defer func() {
 		span.End()
 	}()
-	fmt.Println(Fibonacci(10))
+	val, err := Fibonacci(10, newCtx)
+	if (err != nil) {
+	  panic(err)
+	}
+	fmt.Println(val)
 
 }
