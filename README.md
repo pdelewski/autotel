@@ -69,3 +69,11 @@ func main() {
 ```
 
 We can imagine other methods to say what needs to be instrumented (by argument(s) passed to autotel or configuration file).
+
+## Scenarios
+- ordinary function chain
+- anonymous functions
+- goroutines with named and anonymous functions (without context)
+- goroutines with explicit context 
+- interprocess context propagation explicitly with context object
+- interprocess context propagation handmade without using context
