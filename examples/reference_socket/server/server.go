@@ -5,13 +5,27 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"sumologic.com/autotel/rtlib"
 )
 
 func processRequest(message string) {
+	carrier := propagation.MapCarrier{}
+	carrier.Set("traceparent", message)
+
+	propgator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
+	parentCtx := propgator.Extract(context.Background(), carrier)
+
+	_, span := otel.Tracer("processRequest").Start(parentCtx, "processRequest")
+
+	defer func() {
+		span.End()
+	}()
 	fmt.Print("Message Received:", string(message))
+	time.Sleep(2 * time.Second)
 }
 
 func main() {
@@ -37,10 +51,7 @@ func main() {
 	// accept connection
 	conn, _ := ln.Accept()
 
-	// run loop forever (or until ctrl-c)
-	for {
-		// get message, output
-		message, _ := bufio.NewReader(conn).ReadString('\n')
-		processRequest(message)
-	}
+	message, _ := bufio.NewReader(conn).ReadString('\n')
+	processRequest(message)
+
 }

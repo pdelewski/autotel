@@ -1,15 +1,33 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"net"
-	"os"
+	"time"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"sumologic.com/autotel/rtlib"
 )
+
+func sendRequest(ctx context.Context, conn net.Conn) {
+	thisCtx, span := otel.Tracer("sendRequest").Start(ctx, "sendRequest")
+	defer func() {
+		span.End()
+	}()
+
+	propgator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
+	carrier := propagation.MapCarrier{}
+	propgator.Inject(thisCtx, carrier)
+
+	traceid := carrier["traceparent"]
+	fmt.Println(traceid)
+
+	fmt.Fprintf(conn, traceid)
+	time.Sleep(2 * time.Second)
+
+}
 
 func main() {
 	ts := rtlib.NewTracingState()
@@ -21,19 +39,14 @@ func main() {
 
 	otel.SetTracerProvider(ts.Tp)
 	ctx := context.Background()
-	_, span := otel.Tracer("main").Start(ctx, "main")
+	parentCtx, span := otel.Tracer("main").Start(ctx, "main")
 	defer func() {
 		span.End()
 	}()
 
 	// connect to server
 	conn, _ := net.Dial("tcp", "127.0.0.1:8000")
-	for {
-		// what to send?
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Text to send: ")
-		text, _ := reader.ReadString('\n')
-		// send to server
-		fmt.Fprintf(conn, text+"\n")
-	}
+
+	sendRequest(parentCtx, conn)
+
 }
