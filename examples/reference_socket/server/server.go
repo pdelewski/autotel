@@ -2,8 +2,12 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"net"
+
+	"go.opentelemetry.io/otel"
+	"sumologic.com/autotel/rtlib"
 )
 
 func processRequest(message string) {
@@ -11,6 +15,20 @@ func processRequest(message string) {
 }
 
 func main() {
+	ts := rtlib.NewTracingState()
+	defer func() {
+		if err := ts.Tp.Shutdown(context.Background()); err != nil {
+			ts.Logger.Fatal(err)
+		}
+	}()
+
+	otel.SetTracerProvider(ts.Tp)
+	ctx := context.Background()
+	_, span := otel.Tracer("main").Start(ctx, "main")
+	defer func() {
+		span.End()
+	}()
+
 	fmt.Println("Start server...")
 
 	// listen on port 8000
