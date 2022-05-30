@@ -36,9 +36,9 @@ func main() {
 	defer func() {
 		span.End()
 	}()
-	val, err := Fibonacci(10, newCtx)
-	if (err != nil) {
-	  panic(err)
+	val, err := FibonacciHelper(10, newCtx)
+	if err != nil {
+		panic(err)
 	}
 	fmt.Println(val)
 

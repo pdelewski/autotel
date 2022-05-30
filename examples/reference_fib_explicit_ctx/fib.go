@@ -21,9 +21,17 @@ import (
 	otel "go.opentelemetry.io/otel"
 )
 
+func FibonacciHelper(n uint, ctx context.Context) (uint64, error) {
+	newCtx, span := otel.Tracer("FibonacciHelper").Start(ctx, "FibonacciHelper")
+	defer func() {
+		span.End()
+	}()
+	return Fibonacci(n, newCtx)
+}
+
 // Fibonacci returns the n-th fibonacci number.
 func Fibonacci(n uint, ctx context.Context) (uint64, error) {
-	_, span := otel.Tracer("fib").Start(ctx, "Fib")
+	_, span := otel.Tracer("Fibonacci").Start(ctx, "Fibonacci")
 	defer func() {
 		span.End()
 	}()
