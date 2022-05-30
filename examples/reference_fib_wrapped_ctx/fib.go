@@ -15,11 +15,26 @@
 package main
 
 import (
+	"context"
 	"fmt"
+
+	otel "go.opentelemetry.io/otel"
 )
 
+func FibonacciHelper(n uint, ctx context.Context) (uint64, error) {
+	val, err := func(ctx context.Context) (uint64, error) {
+		wrapperCtx, span := otel.Tracer("Fibonacci").Start(ctx, "Fibonacci")
+		defer func() {
+			span.End()
+		}()
+		return Fibonacci(n, wrapperCtx)
+	}(ctx)
+
+	return val, err
+}
+
 // Fibonacci returns the n-th fibonacci number.
-func Fibonacci(n uint) (uint64, error) {
+func Fibonacci(n uint, ctx context.Context) (uint64, error) {
 	if n <= 1 {
 		return uint64(n), nil
 	}

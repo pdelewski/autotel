@@ -37,11 +37,11 @@ func main() {
 		span.End()
 	}()
 	val, err := func(ctx context.Context) (uint64, error) {
-		_, span := otel.Tracer("fib").Start(ctx, "Fib")
+		wrapperCtx, span := otel.Tracer("FibonacciHelper").Start(ctx, "FibonacciHelper")
 		defer func() {
 			span.End()
 		}()
-		return Fibonacci(10)
+		return FibonacciHelper(10, wrapperCtx)
 	}(newCtx)
 
 	if err != nil {
