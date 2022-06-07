@@ -26,13 +26,13 @@ func main() {
 
 	messages := make(chan string)
 
-	go func() {
-		_, span := otel.Tracer("fib").Start(newCtx, "anonymous")
+	go func(ctx context.Context) {
+		_, span := otel.Tracer("fib").Start(ctx, "anonymous")
 		defer func() {
 			span.End()
 		}()
 		messages <- "ping"
-	}()
+	}(newCtx)
 
 	msg := <-messages
 	fmt.Println(msg)
