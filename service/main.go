@@ -39,6 +39,9 @@ func readGraphBody(graphFile string) {
 	}
 	files := alib.SearchFiles(projectDir)
 	for _, file := range files {
+		alib.PropagateContext(file, backwardCallGraph, rootFunctions)
+	}
+	for _, file := range files {
 		alib.Instrument(file, backwardCallGraph, rootFunctions)
 	}
 }

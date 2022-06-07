@@ -35,6 +35,9 @@ func inject(root string) {
 		}
 	}
 	for _, file := range files {
+		alib.PropagateContext(file, backwardCallGraph, rootFunctions)
+	}
+	for _, file := range files {
 		alib.Instrument(file, backwardCallGraph, rootFunctions)
 	}
 }
@@ -78,6 +81,9 @@ func main() {
 			fmt.Println("\nroot:" + v)
 		}
 		files := alib.SearchFiles(os.Args[3])
+		for _, file := range files {
+			alib.PropagateContext(file, backwardCallGraph, rootFunctions)
+		}
 		for _, file := range files {
 			alib.Instrument(file, backwardCallGraph, rootFunctions)
 		}
