@@ -33,7 +33,23 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 				fmt.Printf("    ast type          : %T\n", param.Type)
 				fmt.Printf("    type desc         : %+v\n", param.Type)
 			}
+			ctxField := &ast.Field{
+				Names: []*ast.Ident{
+					&ast.Ident{
+						Name: "__tracing_ctx",
+					},
+				},
+				Type: &ast.SelectorExpr{
+					X: &ast.Ident{
+						Name: "context",
+					},
+					Sel: &ast.Ident{
+						Name: "Context",
+					},
+				},
+			}
 
+			x.Type.Params.List = append([]*ast.Field{ctxField}, x.Type.Params.List...)
 		case *ast.CallExpr:
 			ident, ok := x.Fun.(*ast.Ident)
 			if ok {
