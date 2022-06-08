@@ -26,6 +26,16 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 			// if !exists {
 			// 	return false
 			// }
+			// TODO this is not optimap o(n)
+			exists := false
+			for k, v := range callgraph {
+				if k == x.Name.Name || v == x.Name.Name {
+					exists = true
+				}
+			}
+			if !exists {
+				return false
+			}
 			// fmt.Printf("function decl: %s, parameters:\n", x.Name)
 			// for _, param := range x.Type.Params.List {
 			// fmt.Printf("  Name: %s\n", param.Names[0])
