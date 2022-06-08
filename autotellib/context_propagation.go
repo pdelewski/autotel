@@ -1,7 +1,6 @@
 package autotellib
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -23,16 +22,16 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 		case *ast.FuncDecl:
 			// inject context only
 			// functions available in the call graph
-			_, exists := callgraph[x.Name.Name]
-			if !exists {
-				return false
-			}
-			fmt.Printf("function decl: %s, parameters:\n", x.Name)
-			for _, param := range x.Type.Params.List {
-				fmt.Printf("  Name: %s\n", param.Names[0])
-				fmt.Printf("    ast type          : %T\n", param.Type)
-				fmt.Printf("    type desc         : %+v\n", param.Type)
-			}
+			// _, exists := callgraph[x.Name.Name]
+			// if !exists {
+			// 	return false
+			// }
+			// fmt.Printf("function decl: %s, parameters:\n", x.Name)
+			// for _, param := range x.Type.Params.List {
+			// fmt.Printf("  Name: %s\n", param.Names[0])
+			// fmt.Printf("    ast type          : %T\n", param.Type)
+			// fmt.Printf("    type desc         : %+v\n", param.Type)
+			// }
 			ctxField := &ast.Field{
 				Names: []*ast.Ident{
 					&ast.Ident{
@@ -48,12 +47,22 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 					},
 				},
 			}
-
-			x.Type.Params.List = append([]*ast.Field{ctxField}, x.Type.Params.List...)
+			x.Type.Params.List = append(x.Type.Params.List, ctxField)
 		case *ast.CallExpr:
-			ident, ok := x.Fun.(*ast.Ident)
+			_, ok := x.Fun.(*ast.Ident)
 			if ok {
-				fmt.Println("call:", ident.Name)
+				// fmt.Println("call:", ident.Name)
+				// for _, arg := range x.Args {
+				// 	_, ok := arg.(*ast.Ident)
+				// 	if ok {
+				// 	 fmt.Println(arg.(*ast.Ident).Name)
+				// 	}
+				// }
+				ctxArg := &ast.Ident{
+					Name: "__child_tracing_ctx",
+				}
+				x.Args = append(x.Args, ctxArg)
+
 			}
 		}
 		return true
