@@ -80,6 +80,27 @@ func BuildCallGraph(file string) map[string]string {
 
 	return backwardCallGraph
 }
+
+func FindFuncDecls(file string) map[string]bool {
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	if err != nil {
+		panic(err)
+	}
+
+	funcDecls := make(map[string]bool)
+
+	ast.Inspect(node, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.FuncDecl:
+			funcDecls[x.Name.Name] = true
+		}
+		return true
+	})
+
+	return funcDecls
+}
+
 func InferRootFunctionsFromGraph(callgraph map[string]string) []string {
 	var allFunctions map[string]bool
 	var rootFunctions []string

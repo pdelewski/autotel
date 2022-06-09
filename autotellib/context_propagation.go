@@ -10,13 +10,14 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func PropagateContext(file string, callgraph map[string]string, rootFunctions []string) {
+func PropagateContext(file string, callgraph map[string]string, rootFunctions []string, funcDecls map[string]bool) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {
 		panic(err)
 	}
 	astutil.AddImport(fset, node, "context")
+
 	ast.Inspect(node, func(n ast.Node) bool {
 		switch x := n.(type) {
 		case *ast.FuncDecl:
@@ -59,20 +60,18 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 			}
 			x.Type.Params.List = append(x.Type.Params.List, ctxField)
 		case *ast.CallExpr:
-			_, ok := x.Fun.(*ast.Ident)
+			ident, ok := x.Fun.(*ast.Ident)
 			if ok {
-				// fmt.Println("call:", ident.Name)
-				// for _, arg := range x.Args {
-				// 	_, ok := arg.(*ast.Ident)
-				// 	if ok {
-				// 	 fmt.Println(arg.(*ast.Ident).Name)
-				// 	}
-				// }
-				ctxArg := &ast.Ident{
-					Name: "__child_tracing_ctx",
+				found := funcDecls[ident.Name]
+				// inject context parameter only
+				// to these functions for which function decl
+				// exists
+				if found {
+					ctxArg := &ast.Ident{
+						Name: "__child_tracing_ctx",
+					}
+					x.Args = append(x.Args, ctxArg)
 				}
-				x.Args = append(x.Args, ctxArg)
-
 			}
 		}
 		return true
