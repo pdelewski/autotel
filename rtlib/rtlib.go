@@ -3,6 +3,7 @@
 package rtlib
 
 import (
+	"context"
 	"io"
 	"log"
 	"os"
@@ -66,6 +67,12 @@ func NewResource() *resource.Resource {
 		),
 	)
 	return r
+}
+
+func Shutdown(ts TracingState) {
+	if err := ts.Tp.Shutdown(context.Background()); err != nil {
+		ts.Logger.Fatal(err)
+	}
 }
 
 func SumoAutoInstrument() {
