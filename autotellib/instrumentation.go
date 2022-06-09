@@ -343,7 +343,103 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 				}
 			}
 		case *ast.FuncLit:
+			s1 := &ast.ExprStmt{
+				X: &ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X: &ast.Ident{
+							Name: "fmt",
+						},
+						Sel: &ast.Ident{
+							Name: "Println",
+						},
+					},
+					Args: []ast.Expr{
+						&ast.BasicLit{
+							Kind:  token.STRING,
+							Value: `"child instrumentation"`,
+						},
+					},
+				},
+			}
+			s2 := &ast.AssignStmt{
+				Lhs: []ast.Expr{
+					&ast.Ident{
+						Name: "__child_tracing_ctx",
+					},
+					&ast.Ident{
+						Name: "span",
+					},
+				},
+				Tok: token.DEFINE,
+				Rhs: []ast.Expr{
+					&ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X: &ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X: &ast.Ident{
+										Name: "otel",
+									},
+									Sel: &ast.Ident{
+										Name: "Tracer",
+									},
+								},
+								Lparen: 50,
+								Args: []ast.Expr{
+									&ast.Ident{
+										Name: `"` + "anonymous" + `"`,
+									},
+								},
+								Ellipsis: 0,
+							},
+							Sel: &ast.Ident{
+								Name: "Start",
+							},
+						},
+						Lparen: 62,
+						Args: []ast.Expr{
+							&ast.Ident{
+								Name: "__tracing_ctx",
+							},
+							&ast.Ident{
+								Name: `"` + "anonymous" + `"`,
+							},
+						},
+						Ellipsis: 0,
+					},
+				},
+			}
 
+			s3 := &ast.AssignStmt{
+				Lhs: []ast.Expr{
+					&ast.Ident{
+						Name: "_",
+					},
+				},
+				Tok: token.ASSIGN,
+				Rhs: []ast.Expr{
+					&ast.Ident{
+						Name: "__child_tracing_ctx",
+					},
+				},
+			}
+
+			s4 := &ast.DeferStmt{
+				Defer: 27,
+				Call: &ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X: &ast.Ident{
+							Name: "span",
+						},
+						Sel: &ast.Ident{
+							Name: "End",
+						},
+					},
+					Lparen:   41,
+					Ellipsis: 0,
+				},
+			}
+
+			x.Body.List = append([]ast.Stmt{s1, s2, s3, s4}, x.Body.List...)
 		}
 		return true
 	})
