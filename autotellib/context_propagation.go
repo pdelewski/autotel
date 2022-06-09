@@ -35,7 +35,11 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 				}
 			}
 			if !exists {
-				return false
+				break
+			}
+
+			if Contains(rootFunctions, x.Name.Name) {
+				break
 			}
 			// fmt.Printf("function decl: %s, parameters:\n", x.Name)
 			// for _, param := range x.Type.Params.List {
@@ -63,9 +67,11 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 			ident, ok := x.Fun.(*ast.Ident)
 			if ok {
 				found := funcDecls[ident.Name]
+				_ = found
 				// inject context parameter only
 				// to these functions for which function decl
 				// exists
+
 				if found {
 					ctxArg := &ast.Ident{
 						Name: "__child_tracing_ctx",
@@ -73,6 +79,24 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 					x.Args = append(x.Args, ctxArg)
 				}
 			}
+		case *ast.FuncLit:
+			ctxField := &ast.Field{
+				Names: []*ast.Ident{
+					&ast.Ident{
+						Name: "__tracing_ctx",
+					},
+				},
+				Type: &ast.SelectorExpr{
+					X: &ast.Ident{
+						Name: "context",
+					},
+					Sel: &ast.Ident{
+						Name: "Context",
+					},
+				},
+			}
+
+			x.Type.Params.List = append(x.Type.Params.List, ctxField)
 		}
 		return true
 	})

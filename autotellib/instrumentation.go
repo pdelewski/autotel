@@ -138,34 +138,19 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 					s4 := &ast.DeferStmt{
 						Defer: 27,
 						Call: &ast.CallExpr{
-							Fun: &ast.FuncLit{
-								Type: &ast.FuncType{
-									Func:   33,
-									Params: &ast.FieldList{},
+							Fun: &ast.SelectorExpr{
+								X: &ast.Ident{
+									Name: "span",
 								},
-								Body: &ast.BlockStmt{
-									List: []ast.Stmt{
-										&ast.ExprStmt{
-											X: &ast.CallExpr{
-												Fun: &ast.SelectorExpr{
-													X: &ast.Ident{
-														Name: "span",
-													},
-													Sel: &ast.Ident{
-														Name: "End",
-													},
-												},
-												Lparen:   49,
-												Ellipsis: 0,
-											},
-										},
-									},
+								Sel: &ast.Ident{
+									Name: "End",
 								},
 							},
-							Lparen:   52,
+							Lparen:   41,
 							Ellipsis: 0,
 						},
 					}
+
 					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4}, x.Body.List...)
 				} else {
 					s1 := &ast.ExprStmt{
@@ -254,7 +239,7 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 																			Name: "context",
 																		},
 																		Sel: &ast.Ident{
-																			Name: "Backgroud",
+																			Name: "Background",
 																		},
 																	},
 																	Lparen:   83,
@@ -420,37 +405,23 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 					s8 := &ast.DeferStmt{
 						Defer: 27,
 						Call: &ast.CallExpr{
-							Fun: &ast.FuncLit{
-								Type: &ast.FuncType{
-									Func:   33,
-									Params: &ast.FieldList{},
+							Fun: &ast.SelectorExpr{
+								X: &ast.Ident{
+									Name: "span",
 								},
-								Body: &ast.BlockStmt{
-									List: []ast.Stmt{
-										&ast.ExprStmt{
-											X: &ast.CallExpr{
-												Fun: &ast.SelectorExpr{
-													X: &ast.Ident{
-														Name: "span",
-													},
-													Sel: &ast.Ident{
-														Name: "End",
-													},
-												},
-												Lparen:   49,
-												Ellipsis: 0,
-											},
-										},
-									},
+								Sel: &ast.Ident{
+									Name: "End",
 								},
 							},
-							Lparen:   52,
+							Lparen:   41,
 							Ellipsis: 0,
 						},
 					}
+
 					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4, s5, s6, s7, s8}, x.Body.List...)
 				}
 			}
+		case *ast.FuncLit:
 
 		}
 		return true
