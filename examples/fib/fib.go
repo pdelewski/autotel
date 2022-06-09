@@ -16,8 +16,15 @@ package main
 
 import "fmt"
 
+func foo() {
+	fmt.Println("foo")
+}
+
 func FibonacciHelper(n uint) (uint64, error) {
-  return Fibonacci(n)
+	// defer func() {
+	// 	foo()
+	// }()
+	return Fibonacci(n)
 }
 
 // Fibonacci returns the n-th fibonacci number.
