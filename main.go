@@ -28,6 +28,7 @@ func inject(root string) {
 	for _, file := range files {
 		rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
 	}
+
 	for _, file := range files {
 		callGraphInstance := alib.BuildCallGraph(file)
 		for key, value := range callGraphInstance {

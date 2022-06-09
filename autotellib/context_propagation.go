@@ -16,6 +16,14 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 	if err != nil {
 		panic(err)
 	}
+	out, _ := os.Create(file + ".pass_ctx")
+	defer out.Close()
+
+	if len(rootFunctions) == 0 {
+		printer.Fprint(out, fset, node)
+		return
+	}
+
 	astutil.AddImport(fset, node, "context")
 
 	ast.Inspect(node, func(n ast.Node) bool {
@@ -79,6 +87,7 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 					x.Args = append(x.Args, ctxArg)
 				}
 			}
+
 		case *ast.FuncLit:
 			ctxField := &ast.Field{
 				Names: []*ast.Ident{
@@ -100,8 +109,6 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 		}
 		return true
 	})
-	out, err := os.Create(file + ".pass_ctx")
-	defer out.Close()
 
 	printer.Fprint(out, fset, node)
 }
