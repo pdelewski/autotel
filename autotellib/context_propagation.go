@@ -12,7 +12,7 @@ import (
 
 func PropagateContext(file string, callgraph map[string]string, rootFunctions []string) {
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {
 		panic(err)
 	}

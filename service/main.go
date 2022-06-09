@@ -42,7 +42,7 @@ func readGraphBody(graphFile string) {
 		alib.PropagateContext(file, backwardCallGraph, rootFunctions)
 	}
 	for _, file := range files {
-		alib.Instrument(file, backwardCallGraph, rootFunctions)
+		alib.Instrument(file+".pass_ctx", backwardCallGraph, rootFunctions)
 	}
 }
 

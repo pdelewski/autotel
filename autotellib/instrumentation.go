@@ -34,7 +34,7 @@ func Contains(a []string, x string) bool {
 
 func Instrument(file string, callgraph map[string]string, rootFunctions []string) {
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {
 		panic(err)
 	}
@@ -76,29 +76,7 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 					s2 := &ast.AssignStmt{
 						Lhs: []ast.Expr{
 							&ast.Ident{
-								Name: "ctx",
-							},
-						},
-						Tok: token.DEFINE,
-						Rhs: []ast.Expr{
-							&ast.CallExpr{
-								Fun: &ast.SelectorExpr{
-									X: &ast.Ident{
-										Name: "context",
-									},
-									Sel: &ast.Ident{
-										Name: "Background",
-									},
-								},
-								Lparen:   52,
-								Ellipsis: 0,
-							},
-						},
-					}
-					s3 := &ast.AssignStmt{
-						Lhs: []ast.Expr{
-							&ast.Ident{
-								Name: "_",
+								Name: "__child_tracing_ctx",
 							},
 							&ast.Ident{
 								Name: "span",
@@ -132,7 +110,7 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 								Lparen: 62,
 								Args: []ast.Expr{
 									&ast.Ident{
-										Name: "ctx",
+										Name: "__tracing_ctx",
 									},
 									&ast.Ident{
 										Name: `"` + x.Name.Name + `"`,
@@ -142,6 +120,21 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 							},
 						},
 					}
+
+					s3 := &ast.AssignStmt{
+						Lhs: []ast.Expr{
+							&ast.Ident{
+								Name: "_",
+							},
+						},
+						Tok: token.ASSIGN,
+						Rhs: []ast.Expr{
+							&ast.Ident{
+								Name: "__child_tracing_ctx",
+							},
+						},
+					}
+
 					s4 := &ast.DeferStmt{
 						Defer: 27,
 						Call: &ast.CallExpr{
@@ -367,7 +360,7 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 					s6 := &ast.AssignStmt{
 						Lhs: []ast.Expr{
 							&ast.Ident{
-								Name: "_",
+								Name: "__child_tracing_ctx",
 							},
 							&ast.Ident{
 								Name: "span",
@@ -411,7 +404,20 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 							},
 						},
 					}
-					s7 := &ast.DeferStmt{
+					s7 := &ast.AssignStmt{
+						Lhs: []ast.Expr{
+							&ast.Ident{
+								Name: "_",
+							},
+						},
+						Tok: token.ASSIGN,
+						Rhs: []ast.Expr{
+							&ast.Ident{
+								Name: "__child_tracing_ctx",
+							},
+						},
+					}
+					s8 := &ast.DeferStmt{
 						Defer: 27,
 						Call: &ast.CallExpr{
 							Fun: &ast.FuncLit{
@@ -442,7 +448,7 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 							Ellipsis: 0,
 						},
 					}
-					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4, s5, s6, s7}, x.Body.List...)
+					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4, s5, s6, s7, s8}, x.Body.List...)
 				}
 			}
 
@@ -450,7 +456,7 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 		return true
 	})
 
-	out, err := os.Create(file + ".out")
+	out, err := os.Create(file + ".pass_tracing")
 	defer out.Close()
 
 	printer.Fprint(out, fset, node)
