@@ -87,7 +87,13 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 					x.Args = append(x.Args, ctxArg)
 				}
 			}
-
+			_, ok = x.Fun.(*ast.FuncLit)
+			if ok {
+				ctxArg := &ast.Ident{
+					Name: "__child_tracing_ctx",
+				}
+				x.Args = append(x.Args, ctxArg)
+			}
 		case *ast.FuncLit:
 			ctxField := &ast.Field{
 				Names: []*ast.Ident{

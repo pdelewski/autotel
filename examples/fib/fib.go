@@ -21,9 +21,9 @@ func foo() {
 }
 
 func FibonacciHelper(n uint) (uint64, error) {
-	// func() {
-	// 	foo()
-	// }()
+	func() {
+		foo()
+	}()
 	return Fibonacci(n)
 }
 
