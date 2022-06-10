@@ -32,13 +32,13 @@ func Contains(a []string, x string) bool {
 	return false
 }
 
-func Instrument(file string, callgraph map[string]string, rootFunctions []string) {
+func Instrument(file string, callgraph map[string]string, rootFunctions []string, passFileSuffix string) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {
 		panic(err)
 	}
-	out, _ := os.Create(file + ".pass_tracing")
+	out, _ := os.Create(file + passFileSuffix)
 	defer out.Close()
 
 	if len(rootFunctions) == 0 {

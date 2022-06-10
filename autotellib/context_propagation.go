@@ -10,13 +10,13 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func PropagateContext(file string, callgraph map[string]string, rootFunctions []string, funcDecls map[string]bool) {
+func PropagateContext(file string, callgraph map[string]string, rootFunctions []string, funcDecls map[string]bool, passFileSuffix string) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {
 		panic(err)
 	}
-	out, _ := os.Create(file + ".pass_ctx")
+	out, _ := os.Create(file + passFileSuffix)
 	defer out.Close()
 
 	if len(rootFunctions) == 0 {

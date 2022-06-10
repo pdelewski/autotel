@@ -181,10 +181,13 @@ func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map
 			funcDecls[k] = v
 		}
 	}
+	contextPassFileSuffix := ".pass_ctx"
+	instrumentationPassFileSuffix := ".pass_tracing.go"
+
 	for _, file := range files {
-		PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls)
+		PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls, contextPassFileSuffix)
 	}
 	for _, file := range files {
-		Instrument(file+".pass_ctx", backwardCallGraph, rootFunctions)
+		Instrument(file+contextPassFileSuffix, backwardCallGraph, rootFunctions, instrumentationPassFileSuffix)
 	}
 }
