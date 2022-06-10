@@ -172,3 +172,19 @@ func Generatecfg(callgraph map[string]string, path string) {
 	out.WriteString("\n\t]")
 	out.WriteString("\n};")
 }
+
+func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map[string]string) {
+	funcDecls := make(map[string]bool)
+	for _, file := range files {
+		funcDeclsFile := FindFuncDecls(file)
+		for k, v := range funcDeclsFile {
+			funcDecls[k] = v
+		}
+	}
+	for _, file := range files {
+		PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls)
+	}
+	for _, file := range files {
+		Instrument(file+".pass_ctx", backwardCallGraph, rootFunctions)
+	}
+}

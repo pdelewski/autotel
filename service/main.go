@@ -39,19 +39,7 @@ func readGraphBody(graphFile string) {
 	}
 	files := alib.SearchFiles(projectDir)
 
-	funcDecls := make(map[string]bool)
-	for _, file := range files {
-		funcDeclsFile := alib.FindFuncDecls(file)
-		for k, v := range funcDeclsFile {
-			funcDecls[k] = v
-		}
-	}
-	for _, file := range files {
-		alib.PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls)
-	}
-	for _, file := range files {
-		alib.Instrument(file+".pass_ctx", backwardCallGraph, rootFunctions)
-	}
+	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
 }
 
 func inject(w http.ResponseWriter, r *http.Request) {

@@ -35,19 +35,7 @@ func inject(root string) {
 			backwardCallGraph[key] = value
 		}
 	}
-	funcDecls := make(map[string]bool)
-	for _, file := range files {
-		funcDeclsFile := alib.FindFuncDecls(file)
-		for k, v := range funcDeclsFile {
-			funcDecls[k] = v
-		}
-	}
-	for _, file := range files {
-		alib.PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls)
-	}
-	for _, file := range files {
-		alib.Instrument(file+".pass_ctx", backwardCallGraph, rootFunctions)
-	}
+	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
 }
 
 // Parsing algorithm works as follows. It goes through all function
@@ -76,7 +64,7 @@ func main() {
 
 		scanner := bufio.NewScanner(file)
 		backwardCallGraph := make(map[string]string)
-		funcDecls := make(map[string]bool)
+
 		for scanner.Scan() {
 			line := scanner.Text()
 			keyValue := strings.Split(line, " ")
@@ -90,18 +78,7 @@ func main() {
 			fmt.Println("\nroot:" + v)
 		}
 		files := alib.SearchFiles(os.Args[3])
-		for _, file := range files {
-			funcDeclsFile := alib.FindFuncDecls(file)
-			for k, v := range funcDeclsFile {
-				funcDecls[k] = v
-			}
-		}
-		for _, file := range files {
-			alib.PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls)
-		}
-		for _, file := range files {
-			alib.Instrument(file+".pass_ctx", backwardCallGraph, rootFunctions)
-		}
+		alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
 		files := alib.SearchFiles(os.Args[2])
