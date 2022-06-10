@@ -160,6 +160,10 @@ func Instrument(file string, callgraph map[string]string, rootFunctions []string
 
 					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4}, x.Body.List...)
 				} else {
+					// check whether this function is root function
+					if !Contains(rootFunctions, x.Name.Name) {
+						return false
+					}
 					s1 := &ast.ExprStmt{
 						X: &ast.CallExpr{
 							Fun: &ast.SelectorExpr{
