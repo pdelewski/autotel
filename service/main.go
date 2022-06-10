@@ -37,7 +37,7 @@ func readGraphBody(graphFile string) {
 	for _, v := range rootFunctions {
 		fmt.Println("\nroot:" + v)
 	}
-	files := alib.SearchFiles(projectDir)
+	files := alib.SearchFiles(projectDir, ".go")
 
 	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
 }
@@ -87,7 +87,7 @@ func main() {
 		usage()
 		return
 	}
-	files := alib.SearchFiles(os.Args[1])
+	files := alib.SearchFiles(os.Args[1], ".go")
 	projectDir = os.Args[1]
 	backwardCallGraph := make(map[string]string)
 	for _, file := range files {

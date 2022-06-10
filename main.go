@@ -20,7 +20,7 @@ func usage() {
 }
 
 func inject(root string) {
-	files := alib.SearchFiles(root)
+	files := alib.SearchFiles(root, ".go")
 
 	var rootFunctions []string
 	backwardCallGraph := make(map[string]string)
@@ -77,11 +77,11 @@ func main() {
 		for _, v := range rootFunctions {
 			fmt.Println("\nroot:" + v)
 		}
-		files := alib.SearchFiles(os.Args[3])
+		files := alib.SearchFiles(os.Args[3], ".go")
 		alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
-		files := alib.SearchFiles(os.Args[2])
+		files := alib.SearchFiles(os.Args[2], ".go")
 		backwardCallGraph := make(map[string]string)
 		for _, file := range files {
 			callGraphInstance := alib.BuildCallGraph(file)
@@ -107,7 +107,7 @@ func main() {
 		alib.Generatecfg(backwardCallGraph, "./ui/callgraph.js")
 	}
 	if os.Args[1] == "--rootfunctions" {
-		files := alib.SearchFiles(os.Args[2])
+		files := alib.SearchFiles(os.Args[2], ".go")
 		var rootFunctions []string
 		for _, file := range files {
 			rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)

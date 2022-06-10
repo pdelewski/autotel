@@ -10,10 +10,10 @@ import (
 	"strconv"
 )
 
-func SearchFiles(root string) []string {
+func SearchFiles(root string, ext string) []string {
 	var files []string
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == ".go" {
+		if filepath.Ext(path) == ext {
 			files = append(files, path)
 		}
 		return nil
@@ -171,23 +171,4 @@ func Generatecfg(callgraph map[string]string, path string) {
 	}
 	out.WriteString("\n\t]")
 	out.WriteString("\n};")
-}
-
-func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map[string]string) {
-	funcDecls := make(map[string]bool)
-	for _, file := range files {
-		funcDeclsFile := FindFuncDecls(file)
-		for k, v := range funcDeclsFile {
-			funcDecls[k] = v
-		}
-	}
-	contextPassFileSuffix := ".pass_ctx"
-	instrumentationPassFileSuffix := ".pass_tracing.go"
-
-	for _, file := range files {
-		PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls, contextPassFileSuffix)
-	}
-	for _, file := range files {
-		Instrument(file+contextPassFileSuffix, backwardCallGraph, rootFunctions, instrumentationPassFileSuffix)
-	}
 }
