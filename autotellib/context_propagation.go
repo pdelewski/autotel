@@ -27,6 +27,24 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 	astutil.AddImport(fset, node, "context")
 
 	ast.Inspect(node, func(n ast.Node) bool {
+		ctxArg := &ast.Ident{
+			Name: "__child_tracing_ctx",
+		}
+		ctxField := &ast.Field{
+			Names: []*ast.Ident{
+				&ast.Ident{
+					Name: "__tracing_ctx",
+				},
+			},
+			Type: &ast.SelectorExpr{
+				X: &ast.Ident{
+					Name: "context",
+				},
+				Sel: &ast.Ident{
+					Name: "Context",
+				},
+			},
+		}
 		switch x := n.(type) {
 		case *ast.FuncDecl:
 			// inject context only
@@ -55,21 +73,6 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 			// fmt.Printf("    ast type          : %T\n", param.Type)
 			// fmt.Printf("    type desc         : %+v\n", param.Type)
 			// }
-			ctxField := &ast.Field{
-				Names: []*ast.Ident{
-					&ast.Ident{
-						Name: "__tracing_ctx",
-					},
-				},
-				Type: &ast.SelectorExpr{
-					X: &ast.Ident{
-						Name: "context",
-					},
-					Sel: &ast.Ident{
-						Name: "Context",
-					},
-				},
-			}
 			x.Type.Params.List = append(x.Type.Params.List, ctxField)
 		case *ast.CallExpr:
 			ident, ok := x.Fun.(*ast.Ident)
@@ -81,17 +84,11 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 				// exists
 
 				if found {
-					ctxArg := &ast.Ident{
-						Name: "__child_tracing_ctx",
-					}
 					x.Args = append(x.Args, ctxArg)
 				}
 			}
 			_, ok = x.Fun.(*ast.FuncLit)
 			if ok {
-				ctxArg := &ast.Ident{
-					Name: "__child_tracing_ctx",
-				}
 				x.Args = append(x.Args, ctxArg)
 			}
 			// TODO selectors are recursive
@@ -102,29 +99,10 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 				// packageIdent, ok := sel.X.(*ast.Ident)
 				found := funcDecls[sel.Sel.Name]
 				if found {
-					ctxArg := &ast.Ident{
-						Name: "__child_tracing_ctx",
-					}
 					x.Args = append(x.Args, ctxArg)
 				}
 			}
 		case *ast.FuncLit:
-			ctxField := &ast.Field{
-				Names: []*ast.Ident{
-					&ast.Ident{
-						Name: "__tracing_ctx",
-					},
-				},
-				Type: &ast.SelectorExpr{
-					X: &ast.Ident{
-						Name: "context",
-					},
-					Sel: &ast.Ident{
-						Name: "Context",
-					},
-				},
-			}
-
 			x.Type.Params.List = append(x.Type.Params.List, ctxField)
 		}
 		return true
