@@ -17,6 +17,7 @@ func usage() {
 	fmt.Println("\t\tdumpcfg                                (dumps control flow graph)")
 	fmt.Println("\t\tgencfg                                 (generates json representation of control flow graph)")
 	fmt.Println("\t\trootfunctions                          (dumps root functions)")
+	fmt.Println("\t\trevert                                 (delete generated files)")
 }
 
 func inject(root string) {
@@ -96,7 +97,7 @@ func main() {
 		}
 	}
 	if os.Args[1] == "--gencfg" {
-		files := alib.SearchFiles(os.Args[2])
+		files := alib.SearchFiles(os.Args[2], ".go")
 		backwardCallGraph := make(map[string]string)
 		for _, file := range files {
 			callGraphInstance := alib.BuildCallGraph(file)
@@ -115,6 +116,9 @@ func main() {
 		for _, fun := range rootFunctions {
 			fmt.Println("\t" + fun)
 		}
+	}
+	if os.Args[1] == "--revert" {
+		alib.Revert(os.Args[2])
 	}
 
 }
