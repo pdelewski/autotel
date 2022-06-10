@@ -72,6 +72,10 @@ func BuildCallGraph(file string) map[string]string {
 			if ok {
 				backwardCallGraph[id.Name] = currentFun
 			}
+			sel, ok := x.Fun.(*ast.SelectorExpr)
+			if ok {
+				backwardCallGraph[sel.Sel.Name] = currentFun
+			}
 		case *ast.FuncDecl:
 			currentFun = x.Name.Name
 		}
