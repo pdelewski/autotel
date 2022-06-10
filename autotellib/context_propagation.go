@@ -94,6 +94,9 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 				}
 				x.Args = append(x.Args, ctxArg)
 			}
+			// TODO selectors are recursive
+			// to handle a.b.c.fun()
+			// all selectors have to unpacked
 			sel, ok := x.Fun.(*ast.SelectorExpr)
 			if ok {
 				// packageIdent, ok := sel.X.(*ast.Ident)
