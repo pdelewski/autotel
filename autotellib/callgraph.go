@@ -55,7 +55,7 @@ func FindRootFunctions(file string) []string {
 	return rootFunctions
 }
 
-func BuildCallGraph(file string) map[string]string {
+func BuildCallGraph(file string) map[string][]string {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
 	if err != nil {
@@ -63,18 +63,22 @@ func BuildCallGraph(file string) map[string]string {
 	}
 
 	currentFun := "nil"
-	backwardCallGraph := make(map[string]string)
+	backwardCallGraph := make(map[string][]string)
 
 	ast.Inspect(node, func(n ast.Node) bool {
 		switch x := n.(type) {
 		case *ast.CallExpr:
 			id, ok := x.Fun.(*ast.Ident)
 			if ok {
-				backwardCallGraph[id.Name] = currentFun
+				childFuns := backwardCallGraph[id.Name]
+				childFuns = append(childFuns, currentFun)
+				backwardCallGraph[id.Name] = childFuns
 			}
 			sel, ok := x.Fun.(*ast.SelectorExpr)
 			if ok {
-				backwardCallGraph[sel.Sel.Name] = currentFun
+				childFuns := backwardCallGraph[sel.Sel.Name]
+				childFuns = append(childFuns, currentFun)
+				backwardCallGraph[sel.Sel.Name] = childFuns
 			}
 		case *ast.FuncDecl:
 			currentFun = x.Name.Name
@@ -134,14 +138,16 @@ func InferRootFunctionsFromGraph(callgraph map[string][]string) []string {
 //     ]
 // };
 
-func Generatecfg(callgraph map[string]string, path string) {
+func Generatecfg(callgraph map[string][]string, path string) {
 	functions := make(map[string]bool, 0)
-	for k, v := range callgraph {
+	for k, childFuns := range callgraph {
 		if functions[k] == false {
 			functions[k] = true
 		}
-		if functions[v] == false {
-			functions[v] = true
+		for _, v := range childFuns {
+			if functions[v] == false {
+				functions[v] = true
+			}
 		}
 	}
 	for f := range functions {
@@ -162,12 +168,15 @@ func Generatecfg(callgraph map[string]string, path string) {
 	out.WriteString("\n\t],")
 	out.WriteString("\n\tedges: [")
 	edgeCounter := 0
-	for k, v := range callgraph {
+	for k, children := range callgraph {
 		out.WriteString("\n\t\t { data: { id: '")
 		out.WriteString("e" + strconv.Itoa(edgeCounter))
 		out.WriteString("', ")
 		out.WriteString("source: '")
-		out.WriteString(v)
+		for _, childFun := range children {
+			out.WriteString(childFun)
+			out.WriteString(" ")
+		}
 		out.WriteString("', ")
 		out.WriteString("target: '")
 		out.WriteString(k)

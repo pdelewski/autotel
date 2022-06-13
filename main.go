@@ -32,10 +32,13 @@ func inject(root string) {
 
 	for _, file := range files {
 		callGraphInstance := alib.BuildCallGraph(file)
-		for key, value := range callGraphInstance {
-			funList := backwardCallGraph[key]
-			funList = append(funList, value)
-			backwardCallGraph[key] = funList
+		for key, funList := range callGraphInstance {
+			funListInstance := backwardCallGraph[key]
+			for _, fun := range funList {
+				funListInstance = append(funListInstance, fun)
+			}
+
+			backwardCallGraph[key] = funListInstance
 		}
 	}
 	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
@@ -85,7 +88,7 @@ func main() {
 	}
 	if os.Args[1] == "--dumpcfg" {
 		files := alib.SearchFiles(os.Args[2], ".go")
-		backwardCallGraph := make(map[string]string)
+		backwardCallGraph := make(map[string][]string)
 		for _, file := range files {
 			callGraphInstance := alib.BuildCallGraph(file)
 			for key, value := range callGraphInstance {
@@ -100,7 +103,7 @@ func main() {
 	}
 	if os.Args[1] == "--gencfg" {
 		files := alib.SearchFiles(os.Args[2], ".go")
-		backwardCallGraph := make(map[string]string)
+		backwardCallGraph := make(map[string][]string)
 		for _, file := range files {
 			callGraphInstance := alib.BuildCallGraph(file)
 			for key, value := range callGraphInstance {
