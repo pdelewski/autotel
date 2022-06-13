@@ -74,9 +74,12 @@ func main() {
 		for scanner.Scan() {
 			line := scanner.Text()
 			keyValue := strings.Split(line, " ")
+			funList := []string{}
 			fmt.Print("\n\t", keyValue[0])
-			fmt.Print(" ", keyValue[1])
-			funList := []string{keyValue[1]}
+			for i := 1; i < len(keyValue); i++ {
+				fmt.Print(" ", keyValue[i])
+				funList = append(funList, keyValue[i])
+			}
 			backwardCallGraph[keyValue[0]] = funList
 		}
 		rootFunctions := alib.InferRootFunctionsFromGraph(backwardCallGraph)
