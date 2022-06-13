@@ -70,15 +70,11 @@ func BuildCallGraph(file string) map[string][]string {
 		case *ast.CallExpr:
 			id, ok := x.Fun.(*ast.Ident)
 			if ok {
-				childFuns := backwardCallGraph[id.Name]
-				childFuns = append(childFuns, currentFun)
-				backwardCallGraph[id.Name] = childFuns
+				backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
 			}
 			sel, ok := x.Fun.(*ast.SelectorExpr)
 			if ok {
-				childFuns := backwardCallGraph[sel.Sel.Name]
-				childFuns = append(childFuns, currentFun)
-				backwardCallGraph[sel.Sel.Name] = childFuns
+				backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
 			}
 		case *ast.FuncDecl:
 			currentFun = x.Name.Name
