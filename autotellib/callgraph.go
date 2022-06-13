@@ -165,20 +165,22 @@ func Generatecfg(callgraph map[string][]string, path string) {
 	out.WriteString("\n\tedges: [")
 	edgeCounter := 0
 	for k, children := range callgraph {
-		out.WriteString("\n\t\t { data: { id: '")
-		out.WriteString("e" + strconv.Itoa(edgeCounter))
-		out.WriteString("', ")
-		out.WriteString("source: '")
 		for _, childFun := range children {
+			out.WriteString("\n\t\t { data: { id: '")
+			out.WriteString("e" + strconv.Itoa(edgeCounter))
+			out.WriteString("', ")
+			out.WriteString("source: '")
+
 			out.WriteString(childFun)
 			out.WriteString(" ")
+
+			out.WriteString("', ")
+			out.WriteString("target: '")
+			out.WriteString(k)
+			out.WriteString("' ")
+			out.WriteString("} },")
+			edgeCounter++
 		}
-		out.WriteString("', ")
-		out.WriteString("target: '")
-		out.WriteString(k)
-		out.WriteString("' ")
-		out.WriteString("} },")
-		edgeCounter++
 	}
 	out.WriteString("\n\t]")
 	out.WriteString("\n};")
