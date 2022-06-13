@@ -9,7 +9,7 @@ const (
 	instrumentationPassFileSuffix = "_pass_tracing.go"
 )
 
-func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map[string]string) {
+func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map[string][]string) {
 	funcDecls := make(map[string]bool)
 	for _, file := range files {
 		funcDeclsFile := FindFuncDecls(file)

@@ -10,14 +10,16 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func isPath(callGraph map[string]string, current string, goal string) bool {
+func isPath(callGraph map[string][]string, current string, goal string) bool {
 	if current == goal {
 		return true
 	}
 	value, ok := callGraph[current]
 	if ok {
-		if isPath(callGraph, value, goal) {
-			return true
+		for _, child := range value {
+			if isPath(callGraph, child, goal) {
+				return true
+			}
 		}
 	}
 	return false
@@ -32,7 +34,7 @@ func Contains(a []string, x string) bool {
 	return false
 }
 
-func Instrument(file string, callgraph map[string]string, rootFunctions []string, passFileSuffix string) {
+func Instrument(file string, callgraph map[string][]string, rootFunctions []string, passFileSuffix string) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {

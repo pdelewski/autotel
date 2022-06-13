@@ -24,7 +24,7 @@ func inject(root string) {
 	files := alib.SearchFiles(root, ".go")
 
 	var rootFunctions []string
-	backwardCallGraph := make(map[string]string)
+	backwardCallGraph := make(map[string][]string)
 
 	for _, file := range files {
 		rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
@@ -33,7 +33,9 @@ func inject(root string) {
 	for _, file := range files {
 		callGraphInstance := alib.BuildCallGraph(file)
 		for key, value := range callGraphInstance {
-			backwardCallGraph[key] = value
+			funList := backwardCallGraph[key]
+			funList = append(funList, value)
+			backwardCallGraph[key] = funList
 		}
 	}
 	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
@@ -64,15 +66,15 @@ func main() {
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
-		backwardCallGraph := make(map[string]string)
+		backwardCallGraph := make(map[string][]string)
 
 		for scanner.Scan() {
 			line := scanner.Text()
 			keyValue := strings.Split(line, " ")
 			fmt.Print("\n\t", keyValue[0])
 			fmt.Print(" ", keyValue[1])
-
-			backwardCallGraph[keyValue[0]] = keyValue[1]
+			funList := []string{keyValue[1]}
+			backwardCallGraph[keyValue[0]] = funList
 		}
 		rootFunctions := alib.InferRootFunctionsFromGraph(backwardCallGraph)
 		for _, v := range rootFunctions {

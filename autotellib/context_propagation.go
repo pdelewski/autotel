@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func PropagateContext(file string, callgraph map[string]string, rootFunctions []string, funcDecls map[string]bool, passFileSuffix string) {
+func PropagateContext(file string, callgraph map[string][]string, rootFunctions []string, funcDecls map[string]bool, passFileSuffix string) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.AllErrors)
 	if err != nil {
@@ -56,8 +56,13 @@ func PropagateContext(file string, callgraph map[string]string, rootFunctions []
 			// TODO this is not optimap o(n)
 			exists := false
 			for k, v := range callgraph {
-				if k == x.Name.Name || v == x.Name.Name {
+				if k == x.Name.Name {
 					exists = true
+				}
+				for _, e := range v {
+					if x.Name.Name == e {
+						exists = true
+					}
 				}
 			}
 			if !exists {

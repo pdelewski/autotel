@@ -105,13 +105,15 @@ func FindFuncDecls(file string) map[string]bool {
 	return funcDecls
 }
 
-func InferRootFunctionsFromGraph(callgraph map[string]string) []string {
+func InferRootFunctionsFromGraph(callgraph map[string][]string) []string {
 	var allFunctions map[string]bool
 	var rootFunctions []string
 	allFunctions = make(map[string]bool)
 	for k, v := range callgraph {
 		allFunctions[k] = true
-		allFunctions[v] = true
+		for _, childFun := range v {
+			allFunctions[childFun] = true
+		}
 	}
 	for k, _ := range allFunctions {
 		_, exists := callgraph[k]
