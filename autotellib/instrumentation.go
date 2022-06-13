@@ -1,6 +1,7 @@
 package autotellib
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -17,6 +18,7 @@ func isPath(callGraph map[string][]string, current string, goal string) bool {
 	value, ok := callGraph[current]
 	if ok {
 		for _, child := range value {
+			fmt.Printf("\n%s -> %s", child, goal)
 			if isPath(callGraph, child, goal) {
 				return true
 			}
