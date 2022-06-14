@@ -11,15 +11,21 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-func isPath(callGraph map[string][]string, current string, goal string) bool {
+func isPath(callGraph map[string][]string, current string, goal string, visited map[string]bool) bool {
 	if current == goal {
 		return true
 	}
+
 	value, ok := callGraph[current]
 	if ok {
 		for _, child := range value {
 			fmt.Printf("\n%s -> %s", child, goal)
-			if isPath(callGraph, child, goal) {
+			exists := visited[child]
+			if exists {
+				continue
+			}
+			visited[child] = true
+			if isPath(callGraph, child, goal, visited) {
 				return true
 			}
 		}
@@ -66,7 +72,8 @@ func Instrument(file string, callgraph map[string][]string, rootFunctions []stri
 			}
 
 			for _, root := range rootFunctions {
-				if isPath(callgraph, x.Name.Name, root) && x.Name.Name != root {
+				visited := map[string]bool{}
+				if isPath(callgraph, x.Name.Name, root, visited) && x.Name.Name != root {
 					s1 := &ast.ExprStmt{
 						X: &ast.CallExpr{
 							Fun: &ast.SelectorExpr{
