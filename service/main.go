@@ -21,14 +21,17 @@ func readGraphBody(graphFile string) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	backwardCallGraph := make(map[string]string)
+	backwardCallGraph := make(map[string][]string)
 	for scanner.Scan() {
 		line := scanner.Text()
 		keyValue := strings.Split(line, " ")
+		funList := []string{}
 		fmt.Print("\n\t", keyValue[0])
-		fmt.Print(" ", keyValue[1])
-
-		backwardCallGraph[keyValue[0]] = keyValue[1]
+		for i := 1; i < len(keyValue); i++ {
+			fmt.Print(" ", keyValue[i])
+			funList = append(funList, keyValue[i])
+		}
+		backwardCallGraph[keyValue[0]] = funList
 	}
 	rootFunctions := alib.InferRootFunctionsFromGraph(backwardCallGraph)
 	if len(rootFunctions) != 1 {
@@ -89,11 +92,16 @@ func main() {
 	}
 	files := alib.SearchFiles(os.Args[1], ".go")
 	projectDir = os.Args[1]
-	backwardCallGraph := make(map[string]string)
+	backwardCallGraph := make(map[string][]string)
 	for _, file := range files {
 		callGraphInstance := alib.BuildCallGraph(file)
-		for key, value := range callGraphInstance {
-			backwardCallGraph[key] = value
+		for key, funList := range callGraphInstance {
+			funListInstance := backwardCallGraph[key]
+			for _, fun := range funList {
+				funListInstance = append(funListInstance, fun)
+			}
+
+			backwardCallGraph[key] = funListInstance
 		}
 	}
 	alib.Generatecfg(backwardCallGraph, "./static/callgraph.js")

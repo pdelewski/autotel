@@ -176,7 +176,6 @@ func Generatecfg(callgraph map[string][]string, path string) {
 			out.WriteString("source: '")
 
 			out.WriteString(childFun)
-			out.WriteString(" ")
 
 			out.WriteString("', ")
 			out.WriteString("target: '")
