@@ -6,23 +6,8 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"path/filepath"
 	"strconv"
 )
-
-func SearchFiles(root string, ext string) []string {
-	var files []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == ext {
-			files = append(files, path)
-		}
-		return nil
-	})
-	if err != nil {
-		panic(err)
-	}
-	return files
-}
 
 func FindRootFunctions(file string) []string {
 	fset := token.NewFileSet()

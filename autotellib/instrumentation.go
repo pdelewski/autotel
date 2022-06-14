@@ -1,7 +1,6 @@
 package autotellib
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -10,37 +9,6 @@ import (
 
 	"golang.org/x/tools/go/ast/astutil"
 )
-
-func isPath(callGraph map[string][]string, current string, goal string, visited map[string]bool) bool {
-	if current == goal {
-		return true
-	}
-
-	value, ok := callGraph[current]
-	if ok {
-		for _, child := range value {
-			fmt.Printf("\n%s -> %s", child, goal)
-			exists := visited[child]
-			if exists {
-				continue
-			}
-			visited[child] = true
-			if isPath(callGraph, child, goal, visited) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func Contains(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
 
 func Instrument(file string, callgraph map[string][]string, rootFunctions []string, passFileSuffix string) {
 	fset := token.NewFileSet()
