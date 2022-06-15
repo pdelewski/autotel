@@ -105,6 +105,17 @@ func FindFuncDecls(file string) map[string]bool {
 	return funcDecls
 }
 
+func FindCompleteFuncDecls(files []string) map[string]bool {
+	funcDecls := make(map[string]bool)
+	for _, file := range files {
+		funcDeclsFile := FindFuncDecls(file)
+		for k, v := range funcDeclsFile {
+			funcDecls[k] = v
+		}
+	}
+	return funcDecls
+}
+
 func InferRootFunctionsFromGraph(callgraph map[string][]string) []string {
 	var allFunctions map[string]bool
 	var rootFunctions []string

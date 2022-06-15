@@ -10,13 +10,7 @@ const (
 )
 
 func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map[string][]string) {
-	funcDecls := make(map[string]bool)
-	for _, file := range files {
-		funcDeclsFile := FindFuncDecls(file)
-		for k, v := range funcDeclsFile {
-			funcDecls[k] = v
-		}
-	}
+	funcDecls := FindCompleteFuncDecls(files)
 
 	for _, file := range files {
 		PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls, contextPassFileSuffix)
