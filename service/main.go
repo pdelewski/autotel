@@ -41,8 +41,8 @@ func readGraphBody(graphFile string) {
 		fmt.Println("\nroot:" + v)
 	}
 	files := alib.SearchFiles(projectDir, ".go")
-
-	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
+	funcDecls := alib.FindCompleteFuncDecls(files)
+	alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)
 }
 
 func inject(w http.ResponseWriter, r *http.Request) {
@@ -92,18 +92,8 @@ func main() {
 	}
 	files := alib.SearchFiles(os.Args[1], ".go")
 	projectDir = os.Args[1]
-	backwardCallGraph := make(map[string][]string)
-	for _, file := range files {
-		callGraphInstance := alib.BuildCallGraph(file)
-		for key, funList := range callGraphInstance {
-			funListInstance := backwardCallGraph[key]
-			for _, fun := range funList {
-				funListInstance = append(funListInstance, fun)
-			}
-
-			backwardCallGraph[key] = funListInstance
-		}
-	}
+	funcDecls := alib.FindCompleteFuncDecls(files)
+	backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 	alib.Generatecfg(backwardCallGraph, "./static/callgraph.js")
 
 	http.HandleFunc("/inject", inject)
