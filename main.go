@@ -89,8 +89,8 @@ func main() {
 		backwardCallGraph := make(map[string][]string)
 		for _, file := range files {
 			callGraphInstance := alib.BuildCallGraph(file)
-			for key, value := range callGraphInstance {
-				backwardCallGraph[key] = value
+			for key, funList := range callGraphInstance {
+				backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
 			}
 		}
 		fmt.Println("\n\tchild parent")
@@ -104,8 +104,8 @@ func main() {
 		backwardCallGraph := make(map[string][]string)
 		for _, file := range files {
 			callGraphInstance := alib.BuildCallGraph(file)
-			for key, value := range callGraphInstance {
-				backwardCallGraph[key] = value
+			for key, funList := range callGraphInstance {
+				backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
 			}
 		}
 		alib.Generatecfg(backwardCallGraph, "callgraph.js")
