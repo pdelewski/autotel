@@ -1,7 +1,6 @@
 package autotellib
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -28,7 +27,6 @@ func isPath(callGraph map[string][]string, current string, goal string, visited 
 	value, ok := callGraph[current]
 	if ok {
 		for _, child := range value {
-			fmt.Printf("\n%s -> %s", child, goal)
 			exists := visited[child]
 			if exists {
 				continue

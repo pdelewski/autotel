@@ -33,12 +33,7 @@ func inject(root string) {
 	for _, file := range files {
 		callGraphInstance := alib.BuildCallGraph(file)
 		for key, funList := range callGraphInstance {
-			funListInstance := backwardCallGraph[key]
-			for _, fun := range funList {
-				funListInstance = append(funListInstance, fun)
-			}
-
-			backwardCallGraph[key] = funListInstance
+			backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
 		}
 	}
 	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
