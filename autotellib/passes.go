@@ -9,9 +9,7 @@ const (
 	instrumentationPassFileSuffix = "_pass_tracing.go"
 )
 
-func ExecutePasses(files []string, rootFunctions []string, backwardCallGraph map[string][]string) {
-	funcDecls := FindCompleteFuncDecls(files)
-
+func ExecutePasses(files []string, rootFunctions []string, funcDecls map[string]bool, backwardCallGraph map[string][]string) {
 	for _, file := range files {
 		PropagateContext(file, backwardCallGraph, rootFunctions, funcDecls, contextPassFileSuffix)
 	}

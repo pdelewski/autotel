@@ -29,9 +29,10 @@ func inject(root string) {
 		rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
 	}
 
-	backwardCallGraph := alib.BuildCompleteCallGraph(files)
+	funcDecls := alib.FindCompleteFuncDecls(files)
+	backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 
-	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
+	alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)
 }
 
 // Parsing algorithm works as follows. It goes through all function
@@ -77,11 +78,14 @@ func main() {
 			fmt.Println("\nroot:" + v)
 		}
 		files := alib.SearchFiles(os.Args[3], ".go")
-		alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
+		funcDecls := alib.FindCompleteFuncDecls(files)
+
+		alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
 		files := alib.SearchFiles(os.Args[2], ".go")
-		backwardCallGraph := alib.BuildCompleteCallGraph(files)
+		funcDecls := alib.FindCompleteFuncDecls(files)
+		backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 
 		fmt.Println("\n\tchild parent")
 		for k, v := range backwardCallGraph {
@@ -91,7 +95,8 @@ func main() {
 	}
 	if os.Args[1] == "--gencfg" {
 		files := alib.SearchFiles(os.Args[2], ".go")
-		backwardCallGraph := alib.BuildCompleteCallGraph(files)
+		funcDecls := alib.FindCompleteFuncDecls(files)
+		backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 
 		alib.Generatecfg(backwardCallGraph, "callgraph.js")
 	}

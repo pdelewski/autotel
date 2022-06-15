@@ -74,12 +74,14 @@ func BuildCallGraph(file string) map[string][]string {
 	return backwardCallGraph
 }
 
-func BuildCompleteCallGraph(files []string) map[string][]string {
+func BuildCompleteCallGraph(files []string, funcDecls map[string]bool) map[string][]string {
 	backwardCallGraph := make(map[string][]string)
 	for _, file := range files {
 		callGraphInstance := BuildCallGraph(file)
 		for key, funList := range callGraphInstance {
-			backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
+			if funcDecls[key] == true {
+				backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
+			}
 		}
 	}
 	return backwardCallGraph
