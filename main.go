@@ -24,18 +24,13 @@ func inject(root string) {
 	files := alib.SearchFiles(root, ".go")
 
 	var rootFunctions []string
-	backwardCallGraph := make(map[string][]string)
 
 	for _, file := range files {
 		rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
 	}
 
-	for _, file := range files {
-		callGraphInstance := alib.BuildCallGraph(file)
-		for key, funList := range callGraphInstance {
-			backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
-		}
-	}
+	backwardCallGraph := alib.BuildCompleteCallGraph(files)
+
 	alib.ExecutePasses(files, rootFunctions, backwardCallGraph)
 }
 
@@ -86,13 +81,8 @@ func main() {
 	}
 	if os.Args[1] == "--dumpcfg" {
 		files := alib.SearchFiles(os.Args[2], ".go")
-		backwardCallGraph := make(map[string][]string)
-		for _, file := range files {
-			callGraphInstance := alib.BuildCallGraph(file)
-			for key, funList := range callGraphInstance {
-				backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
-			}
-		}
+		backwardCallGraph := alib.BuildCompleteCallGraph(files)
+
 		fmt.Println("\n\tchild parent")
 		for k, v := range backwardCallGraph {
 			fmt.Print("\n\t", k)
@@ -101,13 +91,8 @@ func main() {
 	}
 	if os.Args[1] == "--gencfg" {
 		files := alib.SearchFiles(os.Args[2], ".go")
-		backwardCallGraph := make(map[string][]string)
-		for _, file := range files {
-			callGraphInstance := alib.BuildCallGraph(file)
-			for key, funList := range callGraphInstance {
-				backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
-			}
-		}
+		backwardCallGraph := alib.BuildCompleteCallGraph(files)
+
 		alib.Generatecfg(backwardCallGraph, "callgraph.js")
 	}
 	if os.Args[1] == "--rootfunctions" {

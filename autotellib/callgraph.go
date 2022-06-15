@@ -74,6 +74,17 @@ func BuildCallGraph(file string) map[string][]string {
 	return backwardCallGraph
 }
 
+func BuildCompleteCallGraph(files []string) map[string][]string {
+	backwardCallGraph := make(map[string][]string)
+	for _, file := range files {
+		callGraphInstance := BuildCallGraph(file)
+		for key, funList := range callGraphInstance {
+			backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
+		}
+	}
+	return backwardCallGraph
+}
+
 func FindFuncDecls(file string) map[string]bool {
 	fset := token.NewFileSet()
 	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
