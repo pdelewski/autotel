@@ -10,7 +10,7 @@ import (
 )
 
 func usage() {
-	fmt.Println("\nusage autotel --command [path to go project]")
+	fmt.Println("\nusage autotel --command [path to go project] [package pattern]")
 	fmt.Println("\tcommand:")
 	fmt.Println("\t\tinject                                 (injects open telemetry calls into project code)")
 	fmt.Println("\t\tinject-using-graph graph-file          (injects open telemetry calls into project code using provided graph information)")
@@ -20,7 +20,7 @@ func usage() {
 	fmt.Println("\t\trevert                                 (delete generated files)")
 }
 
-func inject(root string) {
+func inject(root string, packagePattern string) {
 	files := alib.SearchFiles(root, ".go")
 
 	var rootFunctions []string
@@ -43,12 +43,14 @@ func inject(root string) {
 func main() {
 	fmt.Println("autotel compiler")
 	args := len(os.Args)
-	if args < 3 {
+	if args < 4 {
 		usage()
 		return
 	}
 	if os.Args[1] == "--inject" {
-		inject(os.Args[2])
+		projectPath := os.Args[2]
+		packagePattern := os.Args[3]
+		inject(projectPath, packagePattern)
 		fmt.Println("\tinstrumentation done")
 	}
 	if os.Args[1] == "--inject-using-graph" {
@@ -77,13 +79,19 @@ func main() {
 		for _, v := range rootFunctions {
 			fmt.Println("\nroot:" + v)
 		}
-		files := alib.SearchFiles(os.Args[3], ".go")
+		projectPath := os.Args[3]
+		packagePattern := os.Args[4]
+		_ = packagePattern
+		files := alib.SearchFiles(projectPath, ".go")
 		funcDecls := alib.FindCompleteFuncDecls(files)
 
 		alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
-		files := alib.SearchFiles(os.Args[2], ".go")
+		projectPath := os.Args[2]
+		packagePattern := os.Args[3]
+		_ = packagePattern
+		files := alib.SearchFiles(projectPath, ".go")
 		funcDecls := alib.FindCompleteFuncDecls(files)
 		backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 
@@ -94,14 +102,20 @@ func main() {
 		}
 	}
 	if os.Args[1] == "--gencfg" {
-		files := alib.SearchFiles(os.Args[2], ".go")
+		projectPath := os.Args[2]
+		packagePattern := os.Args[3]
+		_ = packagePattern
+		files := alib.SearchFiles(projectPath, ".go")
 		funcDecls := alib.FindCompleteFuncDecls(files)
 		backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 
 		alib.Generatecfg(backwardCallGraph, "callgraph.js")
 	}
 	if os.Args[1] == "--rootfunctions" {
-		files := alib.SearchFiles(os.Args[2], ".go")
+		projectPath := os.Args[2]
+		packagePattern := os.Args[3]
+		_ = packagePattern
+		files := alib.SearchFiles(projectPath, ".go")
 		var rootFunctions []string
 		for _, file := range files {
 			rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
@@ -111,7 +125,8 @@ func main() {
 		}
 	}
 	if os.Args[1] == "--revert" {
-		alib.Revert(os.Args[2])
+		projectPath := os.Args[2]
+		alib.Revert(projectPath)
 	}
 
 }
