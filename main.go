@@ -27,7 +27,7 @@ func inject(root string, packagePattern string) {
 
 	rootFunctions = append(rootFunctions, alib.GlobalFindRootFunctions(root, packagePattern)...)
 
-	funcDecls := alib.FindCompleteFuncDecls(files)
+	funcDecls := alib.GlobalFindFuncDecls(root, packagePattern)
 	backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
 
 	alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)

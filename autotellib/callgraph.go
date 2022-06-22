@@ -24,14 +24,14 @@ func GlobalFindRootFunctions(projectPath string, packagePattern string) []string
 	var currentFun string
 	var rootFunctions []string
 
-	_ = fset
+	fmt.Println("GlobalFindRootFunctions")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, pkg := range pkgs {
-		fmt.Println(pkg)
+		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
@@ -131,6 +131,30 @@ func BuildCompleteCallGraph(files []string, funcDecls map[string]bool) map[strin
 		}
 	}
 	return backwardCallGraph
+}
+
+func GlobalFindFuncDecls(projectPath string, packagePattern string) map[string]bool {
+	fset := token.NewFileSet()
+	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
+	pkgs, err := packages.Load(cfg, packagePattern)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("GlobalFindFuncDecls")
+	funcDecls := make(map[string]bool)
+	for _, pkg := range pkgs {
+		fmt.Println("\t", pkg)
+		for _, node := range pkg.Syntax {
+			ast.Inspect(node, func(n ast.Node) bool {
+				switch x := n.(type) {
+				case *ast.FuncDecl:
+					funcDecls[x.Name.Name] = true
+				}
+				return true
+			})
+		}
+	}
+	return funcDecls
 }
 
 func FindFuncDecls(file string) map[string]bool {
