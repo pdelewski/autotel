@@ -133,6 +133,44 @@ func BuildCompleteCallGraph(files []string, funcDecls map[string]bool) map[strin
 	return backwardCallGraph
 }
 
+func GlobalBuildCallGraph(projectPath string, packagePattern string) map[string][]string {
+	fset := token.NewFileSet()
+	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
+	pkgs, err := packages.Load(cfg, packagePattern)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("GlobalBuildCallGraph")
+	currentFun := "nil"
+	backwardCallGraph := make(map[string][]string)
+	for _, pkg := range pkgs {
+		fmt.Println("\t", pkg)
+		for _, node := range pkg.Syntax {
+			ast.Inspect(node, func(n ast.Node) bool {
+				switch x := n.(type) {
+				case *ast.CallExpr:
+					id, ok := x.Fun.(*ast.Ident)
+					if ok {
+						if !Contains(backwardCallGraph[id.Name], currentFun) {
+							backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
+						}
+					}
+					sel, ok := x.Fun.(*ast.SelectorExpr)
+					if ok {
+						if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
+							backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
+						}
+					}
+				case *ast.FuncDecl:
+					currentFun = x.Name.Name
+				}
+				return true
+			})
+		}
+	}
+	return backwardCallGraph
+}
+
 func GlobalFindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
