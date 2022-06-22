@@ -25,9 +25,7 @@ func inject(root string, packagePattern string) {
 
 	var rootFunctions []string
 
-	for _, file := range files {
-		rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
-	}
+	rootFunctions = append(rootFunctions, alib.GlobalFindRootFunctions(root, packagePattern)...)
 
 	funcDecls := alib.FindCompleteFuncDecls(files)
 	backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)

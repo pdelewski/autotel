@@ -5,9 +5,55 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"log"
 	"os"
 	"strconv"
+
+	"golang.org/x/tools/go/packages"
 )
+
+const mode packages.LoadMode = packages.NeedName |
+	packages.NeedTypes |
+	packages.NeedSyntax |
+	packages.NeedTypesInfo |
+	packages.NeedFiles
+
+func GlobalFindRootFunctions(projectPath string, packagePattern string) []string {
+	fset := token.NewFileSet()
+
+	var currentFun string
+	var rootFunctions []string
+
+	_ = fset
+	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
+	pkgs, err := packages.Load(cfg, packagePattern)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, pkg := range pkgs {
+		fmt.Println(pkg)
+		for _, node := range pkg.Syntax {
+			ast.Inspect(node, func(n ast.Node) bool {
+				switch x := n.(type) {
+				case *ast.CallExpr:
+					_, ok := x.Fun.(*ast.Ident)
+					if ok {
+					}
+					selector, ok := x.Fun.(*ast.SelectorExpr)
+					if ok {
+						if selector.Sel.Name == "SumoAutoInstrument" {
+							rootFunctions = append(rootFunctions, currentFun)
+						}
+					}
+				case *ast.FuncDecl:
+					currentFun = x.Name.Name
+				}
+				return true
+			})
+		}
+	}
+	return rootFunctions
+}
 
 func FindRootFunctions(file string) []string {
 	fset := token.NewFileSet()
