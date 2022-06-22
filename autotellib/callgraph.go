@@ -135,7 +135,7 @@ func BuildCompleteCallGraph(files []string, funcDecls map[string]bool) map[strin
 	return backwardCallGraph
 }
 
-func GlobalBuildCallGraph(projectPath string, packagePattern string) map[string][]string {
+func GlobalBuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[string][]string {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
@@ -155,13 +155,17 @@ func GlobalBuildCallGraph(projectPath string, packagePattern string) map[string]
 					id, ok := x.Fun.(*ast.Ident)
 					if ok {
 						if !Contains(backwardCallGraph[id.Name], currentFun) {
-							backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
+							if funcDecls[id.Name] == true {
+								backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
+							}
 						}
 					}
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
 						if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
-							backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
+							if funcDecls[sel.Sel.Name] == true {
+								backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
+							}
 						}
 					}
 				case *ast.FuncDecl:

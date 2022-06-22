@@ -26,7 +26,7 @@ func inject(root string, packagePattern string) {
 	rootFunctions = append(rootFunctions, alib.GlobalFindRootFunctions(root, packagePattern)...)
 
 	funcDecls := alib.GlobalFindFuncDecls(root, packagePattern)
-	backwardCallGraph := alib.GlobalBuildCallGraph(root, packagePattern)
+	backwardCallGraph := alib.GlobalBuildCallGraph(root, packagePattern, funcDecls)
 
 	alib.ExecutePasses(root, packagePattern, rootFunctions, funcDecls, backwardCallGraph)
 }
@@ -77,19 +77,16 @@ func main() {
 		}
 		projectPath := os.Args[3]
 		packagePattern := os.Args[4]
-		_ = packagePattern
-		files := alib.SearchFiles(projectPath, ".go")
-		funcDecls := alib.FindCompleteFuncDecls(files)
+
+		funcDecls := alib.GlobalFindFuncDecls(projectPath, packagePattern)
 
 		alib.ExecutePasses(projectPath, packagePattern, rootFunctions, funcDecls, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
-		_ = packagePattern
-		files := alib.SearchFiles(projectPath, ".go")
-		funcDecls := alib.FindCompleteFuncDecls(files)
-		backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
+		funcDecls := alib.GlobalFindFuncDecls(projectPath, packagePattern)
+		backwardCallGraph := alib.GlobalBuildCallGraph(projectPath, packagePattern, funcDecls)
 
 		fmt.Println("\n\tchild parent")
 		for k, v := range backwardCallGraph {
@@ -100,22 +97,16 @@ func main() {
 	if os.Args[1] == "--gencfg" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
-		_ = packagePattern
-		files := alib.SearchFiles(projectPath, ".go")
-		funcDecls := alib.FindCompleteFuncDecls(files)
-		backwardCallGraph := alib.BuildCompleteCallGraph(files, funcDecls)
-
+		funcDecls := alib.GlobalFindFuncDecls(projectPath, packagePattern)
+		backwardCallGraph := alib.GlobalBuildCallGraph(projectPath, packagePattern, funcDecls)
 		alib.Generatecfg(backwardCallGraph, "callgraph.js")
 	}
 	if os.Args[1] == "--rootfunctions" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
-		_ = packagePattern
-		files := alib.SearchFiles(projectPath, ".go")
 		var rootFunctions []string
-		for _, file := range files {
-			rootFunctions = append(rootFunctions, alib.FindRootFunctions(file)...)
-		}
+		rootFunctions = append(rootFunctions, alib.GlobalFindRootFunctions(projectPath, packagePattern)...)
+		fmt.Println("rootfunctions:")
 		for _, fun := range rootFunctions {
 			fmt.Println("\t" + fun)
 		}
