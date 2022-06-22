@@ -228,6 +228,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 				return true
 			})
 			printer.Fprint(out, fset, node)
+			os.Rename(fset.File(node.Pos()).Name(), fset.File(node.Pos()).Name()+".original")
 		}
 	}
 }

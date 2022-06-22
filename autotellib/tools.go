@@ -52,7 +52,7 @@ func Contains(a []string, x string) bool {
 func Revert(path string) {
 	goExt := ".go"
 	originalExt := ".original"
-	files := SearchFiles(path, goExt+contextPassFileSuffix)
+	files := SearchFiles(path, ".tmp")
 	for _, file := range files {
 		os.Remove(file)
 	}
