@@ -30,7 +30,7 @@ func inject(root string, packagePattern string) {
 	funcDecls := alib.GlobalFindFuncDecls(root, packagePattern)
 	backwardCallGraph := alib.GlobalBuildCallGraph(root, packagePattern)
 
-	alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)
+	alib.ExecutePasses(root, packagePattern, files, rootFunctions, funcDecls, backwardCallGraph)
 }
 
 // Parsing algorithm works as follows. It goes through all function
@@ -83,7 +83,7 @@ func main() {
 		files := alib.SearchFiles(projectPath, ".go")
 		funcDecls := alib.FindCompleteFuncDecls(files)
 
-		alib.ExecutePasses(files, rootFunctions, funcDecls, backwardCallGraph)
+		alib.ExecutePasses(projectPath, packagePattern, files, rootFunctions, funcDecls, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
 		projectPath := os.Args[2]

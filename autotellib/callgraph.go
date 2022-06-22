@@ -32,7 +32,9 @@ func GlobalFindRootFunctions(projectPath string, packagePattern string) []string
 	}
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
+
 		for _, node := range pkg.Syntax {
+			fmt.Println("\t", fset.File(node.Pos()).Name())
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.CallExpr:
@@ -146,6 +148,7 @@ func GlobalBuildCallGraph(projectPath string, packagePattern string) map[string]
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
+			fmt.Println("\t", fset.File(node.Pos()).Name())
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.CallExpr:
@@ -183,6 +186,7 @@ func GlobalFindFuncDecls(projectPath string, packagePattern string) map[string]b
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
+			fmt.Println("\t", fset.File(node.Pos()).Name())
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
