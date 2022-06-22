@@ -3,116 +3,122 @@ package autotellib
 import (
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/token"
+	"log"
 	"os"
 	"strconv"
+
+	"golang.org/x/tools/go/packages"
 )
 
-func FindRootFunctions(file string) []string {
+const mode packages.LoadMode = packages.NeedName |
+	packages.NeedTypes |
+	packages.NeedSyntax |
+	packages.NeedTypesInfo |
+	packages.NeedFiles
+
+func GlobalFindRootFunctions(projectPath string, packagePattern string) []string {
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
-	if err != nil {
-		panic(err)
-	}
 
 	var currentFun string
 	var rootFunctions []string
 
-	ast.Inspect(node, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.CallExpr:
-			_, ok := x.Fun.(*ast.Ident)
-			if ok {
-			}
-			selector, ok := x.Fun.(*ast.SelectorExpr)
-			if ok {
-				if selector.Sel.Name == "SumoAutoInstrument" {
-					rootFunctions = append(rootFunctions, currentFun)
-				}
-			}
-		case *ast.FuncDecl:
-			currentFun = x.Name.Name
-		}
-		return true
-	})
+	fmt.Println("GlobalFindRootFunctions")
+	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
+	pkgs, err := packages.Load(cfg, packagePattern)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, pkg := range pkgs {
+		fmt.Println("\t", pkg)
 
+		for _, node := range pkg.Syntax {
+			fmt.Println("\t", fset.File(node.Pos()).Name())
+			ast.Inspect(node, func(n ast.Node) bool {
+				switch x := n.(type) {
+				case *ast.CallExpr:
+					_, ok := x.Fun.(*ast.Ident)
+					if ok {
+					}
+					selector, ok := x.Fun.(*ast.SelectorExpr)
+					if ok {
+						if selector.Sel.Name == "SumoAutoInstrument" {
+							rootFunctions = append(rootFunctions, currentFun)
+						}
+					}
+				case *ast.FuncDecl:
+					currentFun = x.Name.Name
+				}
+				return true
+			})
+		}
+	}
 	return rootFunctions
 }
 
-func BuildCallGraph(file string) map[string][]string {
+func GlobalBuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[string][]string {
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
+	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
+	fmt.Println("GlobalBuildCallGraph")
 	currentFun := "nil"
 	backwardCallGraph := make(map[string][]string)
-
-	ast.Inspect(node, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.CallExpr:
-			id, ok := x.Fun.(*ast.Ident)
-			if ok {
-				if !Contains(backwardCallGraph[id.Name], currentFun) {
-					backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
+	for _, pkg := range pkgs {
+		fmt.Println("\t", pkg)
+		for _, node := range pkg.Syntax {
+			fmt.Println("\t", fset.File(node.Pos()).Name())
+			ast.Inspect(node, func(n ast.Node) bool {
+				switch x := n.(type) {
+				case *ast.CallExpr:
+					id, ok := x.Fun.(*ast.Ident)
+					if ok {
+						if !Contains(backwardCallGraph[id.Name], currentFun) {
+							if funcDecls[id.Name] == true {
+								backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
+							}
+						}
+					}
+					sel, ok := x.Fun.(*ast.SelectorExpr)
+					if ok {
+						if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
+							if funcDecls[sel.Sel.Name] == true {
+								backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
+							}
+						}
+					}
+				case *ast.FuncDecl:
+					currentFun = x.Name.Name
 				}
-			}
-			sel, ok := x.Fun.(*ast.SelectorExpr)
-			if ok {
-				if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
-					backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
-				}
-			}
-		case *ast.FuncDecl:
-			currentFun = x.Name.Name
-		}
-		return true
-	})
-
-	return backwardCallGraph
-}
-
-func BuildCompleteCallGraph(files []string, funcDecls map[string]bool) map[string][]string {
-	backwardCallGraph := make(map[string][]string)
-	for _, file := range files {
-		callGraphInstance := BuildCallGraph(file)
-		for key, funList := range callGraphInstance {
-			if funcDecls[key] == true {
-				backwardCallGraph[key] = append(backwardCallGraph[key], funList...)
-			}
+				return true
+			})
 		}
 	}
 	return backwardCallGraph
 }
 
-func FindFuncDecls(file string) map[string]bool {
+func GlobalFindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
+	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
+	fmt.Println("GlobalFindFuncDecls")
 	funcDecls := make(map[string]bool)
-
-	ast.Inspect(node, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.FuncDecl:
-			funcDecls[x.Name.Name] = true
-		}
-		return true
-	})
-
-	return funcDecls
-}
-
-func FindCompleteFuncDecls(files []string) map[string]bool {
-	funcDecls := make(map[string]bool)
-	for _, file := range files {
-		funcDeclsFile := FindFuncDecls(file)
-		for k, v := range funcDeclsFile {
-			funcDecls[k] = v
+	for _, pkg := range pkgs {
+		fmt.Println("\t", pkg)
+		for _, node := range pkg.Syntax {
+			fmt.Println("\t", fset.File(node.Pos()).Name())
+			ast.Inspect(node, func(n ast.Node) bool {
+				switch x := n.(type) {
+				case *ast.FuncDecl:
+					funcDecls[x.Name.Name] = true
+				}
+				return true
+			})
 		}
 	}
 	return funcDecls
