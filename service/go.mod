@@ -1,8 +1,6 @@
-module sumologic.com/autotelservice
+module github.com/pdelewski/autotel/autotelservice
 
 go 1.18
-
-replace sumologic.com/autotellib => ../autotellib
 
 require (
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
