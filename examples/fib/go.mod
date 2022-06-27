@@ -1,12 +1,12 @@
-module sumologic.com/autotel/examples/fib
+module github.com/pdelewski/autotel/examples/fib
 
 go 1.18
 
-replace sumologic.com/autotel => ../..
+replace github.com/pdelewski/autotel => ../..
 
-replace sumologic.com/autotel/rtlib => ../../rtlib
+replace github.com/pdelewski/autotel/rtlib => ../../rtlib
 
-require sumologic.com/autotel/rtlib v0.0.0-00010101000000-000000000000
+require github.com/pdelewski/autotel/rtlib v0.0.0-00010101000000-000000000000
 
 require (
 	github.com/go-logr/logr v1.2.3 // indirect

@@ -1,7 +1,7 @@
 package main
 
 import "fmt"
-import "sumologic.com/autotel/rtlib"
+import "github.com/pdelewski/autotel/rtlib"
 
 func foo() {}
 

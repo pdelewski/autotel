@@ -17,7 +17,7 @@ package main
 import (
 	"fmt"
 
-	"sumologic.com/autotel/rtlib"
+	"github.com/pdelewski/autotel/rtlib"
 )
 
 func main() {

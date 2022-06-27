@@ -1,6 +1,6 @@
 package main
 
-import "sumologic.com/autotel/rtlib"
+import "github.com/pdelewski/autotel/rtlib"
 
 type element struct {
 }

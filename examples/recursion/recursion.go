@@ -1,6 +1,6 @@
 package main
 
-import "sumologic.com/autotel/rtlib"
+import "github.com/pdelewski/autotel/rtlib"
 
 func recur(n int) {
 	if n > 0 {

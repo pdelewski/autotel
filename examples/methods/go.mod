@@ -1,10 +1,10 @@
-module sumologic.com/autotel/examples/methods
+module github.com/pdelewski/autotel/examples/methods
 
 go 1.18
 
-replace sumologic.com/autotel => ../..
+replace github.com/pdelewski/autotel => ../..
 
-replace sumologic.com/autotel/rtlib => ../../rtlib
+replace github.com/pdelewski/autotel/rtlib => ../../rtlib
 
 require (
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -14,5 +14,5 @@ require (
 	go.opentelemetry.io/otel/sdk v1.6.3 // indirect
 	go.opentelemetry.io/otel/trace v1.6.3 // indirect
 	golang.org/x/sys v0.0.0-20210423185535-09eb48e85fd7 // indirect
-	sumologic.com/autotel/rtlib v0.0.0-00010101000000-000000000000 // indirect
+	github.com/pdelewski/autotel/rtlib v0.0.0-00010101000000-000000000000 // indirect
 )
