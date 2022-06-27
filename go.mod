@@ -1,4 +1,4 @@
-module sumologic.com/autotel
+module github.com/pdelewski/autotel
 
 go 1.18
 
@@ -16,4 +16,4 @@ require (
 	sumologic.com/autotellib v0.0.0-00010101000000-000000000000 // indirect
 )
 
-replace sumologic.com/autotellib => ./autotellib
+

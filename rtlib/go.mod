@@ -1,4 +1,4 @@
-module sumologic.com/autotel
+module github.com/pdelewski/autotel
 
 go 1.18
 
