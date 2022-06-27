@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	alib "sumologic.com/autotellib"
+	alib "github.com/pdelewski/autotel/autotellib"
 )
 
 func usage() {
