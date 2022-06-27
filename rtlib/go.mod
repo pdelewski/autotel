@@ -1,4 +1,4 @@
-module github.com/pdelewski/autotel
+module github.com/pdelewski/autotel/rtlib
 
 go 1.18
 
