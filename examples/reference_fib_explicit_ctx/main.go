@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	otel "go.opentelemetry.io/otel"
-	"sumologic.com/autotel/rtlib"
+	"github.com/pdelewski/autotel/rtlib"
 )
 
 func main() {

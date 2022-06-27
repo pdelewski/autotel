@@ -9,7 +9,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	"sumologic.com/autotel/rtlib"
+	"github.com/pdelewski/autotel/rtlib"
 )
 
 func processRequest(message string) {
