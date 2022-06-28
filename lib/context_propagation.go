@@ -33,7 +33,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 				continue
 			}
 			astutil.AddImport(fset, node, "context")
-
+			currentFun := "nil"
 			ast.Inspect(node, func(n ast.Node) bool {
 				ctxArg := &ast.Ident{
 					Name: "__child_tracing_ctx",
@@ -62,6 +62,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					// 	return false
 					// }
 					// TODO this is not optimap o(n)
+					currentFun = x.Name.Name
 					exists := false
 					for k, v := range callgraph {
 						if k == x.Name.Name {
@@ -97,7 +98,23 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 						// exists
 
 						if found {
-							x.Args = append(x.Args, ctxArg)
+							visited := map[string]bool{}
+							if isPath(callgraph, currentFun, rootFunctions[0], visited) {
+								x.Args = append(x.Args, ctxArg)
+							} else {
+								x.Args = append(x.Args, &ast.CallExpr{
+									Fun: &ast.SelectorExpr{
+										X: &ast.Ident{
+											Name: "context",
+										},
+										Sel: &ast.Ident{
+											Name: "TODO",
+										},
+									},
+									Lparen:   39,
+									Ellipsis: 0,
+								})
+							}
 						}
 					}
 					_, ok = x.Fun.(*ast.FuncLit)
@@ -112,7 +129,23 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 						// packageIdent, ok := sel.X.(*ast.Ident)
 						found := funcDecls[sel.Sel.Name]
 						if found {
-							x.Args = append(x.Args, ctxArg)
+							visited := map[string]bool{}
+							if isPath(callgraph, currentFun, rootFunctions[0], visited) {
+								x.Args = append(x.Args, ctxArg)
+							} else {
+								x.Args = append(x.Args, &ast.CallExpr{
+									Fun: &ast.SelectorExpr{
+										X: &ast.Ident{
+											Name: "context",
+										},
+										Sel: &ast.Ident{
+											Name: "TODO",
+										},
+									},
+									Lparen:   39,
+									Ellipsis: 0,
+								})
+							}
 						}
 					}
 				case *ast.FuncLit:
