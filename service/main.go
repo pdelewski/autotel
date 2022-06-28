@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	alib "github.com/pdelewski/autotel/autotellib"
+	alib "github.com/pdelewski/autotel/lib"
 )
 
 var projectDir string
