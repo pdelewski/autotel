@@ -87,7 +87,10 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					// fmt.Printf("    ast type          : %T\n", param.Type)
 					// fmt.Printf("    type desc         : %+v\n", param.Type)
 					// }
-					x.Type.Params.List = append(x.Type.Params.List, ctxField)
+					visited := map[string]bool{}
+					if isPath(callgraph, currentFun, rootFunctions[0], visited) {
+						x.Type.Params.List = append(x.Type.Params.List, ctxField)
+					}
 				case *ast.CallExpr:
 					ident, ok := x.Fun.(*ast.Ident)
 					if ok {
@@ -98,6 +101,9 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 						// exists
 
 						if found {
+							// There can be several paths from child function to main one
+							// All have to be checked to be sure whether additional
+							// context parameter needs to be added
 							visited := map[string]bool{}
 							if isPath(callgraph, currentFun, rootFunctions[0], visited) {
 								x.Args = append(x.Args, ctxArg)
@@ -129,6 +135,9 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 						// packageIdent, ok := sel.X.(*ast.Ident)
 						found := funcDecls[sel.Sel.Name]
 						if found {
+							// There can be several paths from child function to main one
+							// All have to be checked to be sure whether additional
+							// context parameter needs to be added
 							visited := map[string]bool{}
 							if isPath(callgraph, currentFun, rootFunctions[0], visited) {
 								x.Args = append(x.Args, ctxArg)
