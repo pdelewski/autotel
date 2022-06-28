@@ -146,8 +146,8 @@ func GlobalInstrument(projectPath string, packagePattern string, file string, ca
 									Ellipsis: 0,
 								},
 							}
-
-							x.Body.List = append([]ast.Stmt{s1, s2, s3, s4}, x.Body.List...)
+							_ = s1
+							x.Body.List = append([]ast.Stmt{s2, s3, s4}, x.Body.List...)
 						} else {
 							// check whether this function is root function
 							if !Contains(rootFunctions, x.Name.Name) {
@@ -338,8 +338,8 @@ func GlobalInstrument(projectPath string, packagePattern string, file string, ca
 									Ellipsis: 0,
 								},
 							}
-
-							x.Body.List = append([]ast.Stmt{s1, s2, s3, s4, s5, s6, s7, s8}, x.Body.List...)
+							_ = s1
+							x.Body.List = append([]ast.Stmt{s2, s3, s4, s5, s6, s7, s8}, x.Body.List...)
 						}
 					}
 				case *ast.FuncLit:
@@ -438,8 +438,8 @@ func GlobalInstrument(projectPath string, packagePattern string, file string, ca
 							Ellipsis: 0,
 						},
 					}
-
-					x.Body.List = append([]ast.Stmt{s1, s2, s3, s4}, x.Body.List...)
+					_ = s1
+					x.Body.List = append([]ast.Stmt{s2, s3, s4}, x.Body.List...)
 				}
 				return true
 			})
