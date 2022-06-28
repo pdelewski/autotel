@@ -32,7 +32,6 @@ func GlobalInstrument(projectPath string, packagePattern string, file string, ca
 				printer.Fprint(out, fset, node)
 				continue
 			}
-			astutil.AddImport(fset, node, "fmt")
 			astutil.AddImport(fset, node, "context")
 			astutil.AddNamedImport(fset, node, "otel", "go.opentelemetry.io/otel")
 			ast.Inspect(node, func(n ast.Node) bool {
