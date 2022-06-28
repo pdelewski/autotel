@@ -1,4 +1,4 @@
-package autotellib
+package lib
 
 import (
 	"fmt"

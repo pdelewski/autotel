@@ -1,4 +1,4 @@
-package autotellib
+package lib
 
 const (
 	contextPassFileSuffix         = "_pass_ctx.go"
