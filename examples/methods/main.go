@@ -9,6 +9,10 @@ type driver struct {
   e element
 }
 
+type i interface {
+  foo(p int)
+}
+
 func (d driver) process(a int) {
 }
 
