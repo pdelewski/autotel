@@ -6,11 +6,17 @@ type element struct {
 }
 
 type driver struct {
-  e element
+	e element
 }
 
 type i interface {
-  foo(p int)
+	foo(p int)
+}
+
+type impl struct {
+}
+
+func (i impl) foo(p int) {
 }
 
 func (d driver) process(a int) {
@@ -24,4 +30,6 @@ func main() {
 	d := driver{}
 	d.process(10)
 	d.e.get(5)
+	i := impl{}
+	i.foo(10)
 }

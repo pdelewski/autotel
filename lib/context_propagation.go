@@ -164,7 +164,10 @@ func PropagateContext(projectPath string,
 				case *ast.InterfaceType:
 					for _, method := range x.Methods.List {
 						if funcType, ok := method.Type.(*ast.FuncType); ok {
-							funcType.Params.List = append(funcType.Params.List, ctxField)
+							visited := map[string]bool{}
+							if isPath(callgraph, method.Names[0].Name, rootFunctions[0], visited) {
+								funcType.Params.List = append(funcType.Params.List, ctxField)
+							}
 
 						}
 					}
