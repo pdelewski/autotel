@@ -34,6 +34,40 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 			}
 			astutil.AddImport(fset, node, "context")
 			invokerFun := "nil"
+
+			emitCallExpr := func(name string, n ast.Node, ctxArg *ast.Ident) {
+				switch x := n.(type) {
+				case *ast.CallExpr:
+					found := funcDecls[name]
+					// inject context parameter only
+					// to these functions for which function decl
+					// exists
+
+					if found {
+						// There can be several paths from child function to main one
+						// All have to be checked to be sure whether additional
+						// context parameter needs to be added
+						visited := map[string]bool{}
+						if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
+							x.Args = append(x.Args, ctxArg)
+						} else {
+							x.Args = append(x.Args, &ast.CallExpr{
+								Fun: &ast.SelectorExpr{
+									X: &ast.Ident{
+										Name: "context",
+									},
+									Sel: &ast.Ident{
+										Name: "TODO",
+									},
+								},
+								Lparen:   39,
+								Ellipsis: 0,
+							})
+						}
+					}
+				}
+			}
+
 			ast.Inspect(node, func(n ast.Node) bool {
 				ctxArg := &ast.Ident{
 					Name: "__child_tracing_ctx",
@@ -81,12 +115,6 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					if Contains(rootFunctions, x.Name.Name) {
 						break
 					}
-					// fmt.Printf("function decl: %s, parameters:\n", x.Name)
-					// for _, param := range x.Type.Params.List {
-					// fmt.Printf("  Name: %s\n", param.Names[0])
-					// fmt.Printf("    ast type          : %T\n", param.Type)
-					// fmt.Printf("    type desc         : %+v\n", param.Type)
-					// }
 					visited := map[string]bool{}
 					if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
 						x.Type.Params.List = append(x.Type.Params.List, ctxField)
@@ -95,68 +123,19 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					ident, ok := x.Fun.(*ast.Ident)
 
 					if ok {
-						found := funcDecls[ident.Name]
-						// inject context parameter only
-						// to these functions for which function decl
-						// exists
-
-						if found {
-							// There can be several paths from child function to main one
-							// All have to be checked to be sure whether additional
-							// context parameter needs to be added
-							visited := map[string]bool{}
-							if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
-								x.Args = append(x.Args, ctxArg)
-							} else {
-								x.Args = append(x.Args, &ast.CallExpr{
-									Fun: &ast.SelectorExpr{
-										X: &ast.Ident{
-											Name: "context",
-										},
-										Sel: &ast.Ident{
-											Name: "TODO",
-										},
-									},
-									Lparen:   39,
-									Ellipsis: 0,
-								})
-							}
-						}
+						emitCallExpr(ident.Name, n, ctxArg)
 					}
 					_, ok = x.Fun.(*ast.FuncLit)
 					if ok {
 						x.Args = append(x.Args, ctxArg)
 					}
 					// TODO selectors are recursive
-					// to handle a.b.c.fun()
-					// all selectors have to unpacked
+					// a.b.c.fun()
+					// check whether the most outer one is package
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 
 					if ok {
-						// packageIdent, ok := sel.X.(*ast.Ident)
-						found := funcDecls[sel.Sel.Name]
-						if found {
-							// There can be several paths from child function to main one
-							// All have to be checked to be sure whether additional
-							// context parameter needs to be added
-							visited := map[string]bool{}
-							if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
-								x.Args = append(x.Args, ctxArg)
-							} else {
-								x.Args = append(x.Args, &ast.CallExpr{
-									Fun: &ast.SelectorExpr{
-										X: &ast.Ident{
-											Name: "context",
-										},
-										Sel: &ast.Ident{
-											Name: "TODO",
-										},
-									},
-									Lparen:   39,
-									Ellipsis: 0,
-								})
-							}
-						}
+						emitCallExpr(sel.Sel.Name, n, ctxArg)
 					}
 				case *ast.FuncLit:
 					x.Type.Params.List = append(x.Type.Params.List, ctxField)
