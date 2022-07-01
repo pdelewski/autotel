@@ -14,7 +14,7 @@ import (
 
 func GlobalInstrument(projectPath string, packagePattern string, file string, callgraph map[string][]string, rootFunctions []string, passFileSuffix string) {
 	fset := token.NewFileSet()
-	fmt.Println("GlobalPropagateContext")
+	fmt.Println("GlobalInstrumentation")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
