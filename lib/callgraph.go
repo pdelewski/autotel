@@ -17,7 +17,7 @@ const mode packages.LoadMode = packages.NeedName |
 	packages.NeedTypesInfo |
 	packages.NeedFiles
 
-func GlobalFindRootFunctions(projectPath string, packagePattern string) []string {
+func FindRootFunctions(projectPath string, packagePattern string) []string {
 	fset := token.NewFileSet()
 
 	var currentFun string
@@ -56,7 +56,7 @@ func GlobalFindRootFunctions(projectPath string, packagePattern string) []string
 	return rootFunctions
 }
 
-func GlobalBuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[string][]string {
+func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[string][]string {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
@@ -99,7 +99,7 @@ func GlobalBuildCallGraph(projectPath string, packagePattern string, funcDecls m
 	return backwardCallGraph
 }
 
-func GlobalFindFuncDecls(projectPath string, packagePattern string) map[string]bool {
+func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)

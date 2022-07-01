@@ -23,10 +23,10 @@ func usage() {
 func inject(root string, packagePattern string) {
 	var rootFunctions []string
 
-	rootFunctions = append(rootFunctions, alib.GlobalFindRootFunctions(root, packagePattern)...)
+	rootFunctions = append(rootFunctions, alib.FindRootFunctions(root, packagePattern)...)
 
-	funcDecls := alib.GlobalFindFuncDecls(root, packagePattern)
-	backwardCallGraph := alib.GlobalBuildCallGraph(root, packagePattern, funcDecls)
+	funcDecls := alib.FindFuncDecls(root, packagePattern)
+	backwardCallGraph := alib.BuildCallGraph(root, packagePattern, funcDecls)
 
 	alib.ExecutePasses(root, packagePattern, rootFunctions, funcDecls, backwardCallGraph)
 }
@@ -78,15 +78,15 @@ func main() {
 		projectPath := os.Args[3]
 		packagePattern := os.Args[4]
 
-		funcDecls := alib.GlobalFindFuncDecls(projectPath, packagePattern)
+		funcDecls := alib.FindFuncDecls(projectPath, packagePattern)
 
 		alib.ExecutePasses(projectPath, packagePattern, rootFunctions, funcDecls, backwardCallGraph)
 	}
 	if os.Args[1] == "--dumpcfg" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
-		funcDecls := alib.GlobalFindFuncDecls(projectPath, packagePattern)
-		backwardCallGraph := alib.GlobalBuildCallGraph(projectPath, packagePattern, funcDecls)
+		funcDecls := alib.FindFuncDecls(projectPath, packagePattern)
+		backwardCallGraph := alib.BuildCallGraph(projectPath, packagePattern, funcDecls)
 
 		fmt.Println("\n\tchild parent")
 		for k, v := range backwardCallGraph {
@@ -97,15 +97,15 @@ func main() {
 	if os.Args[1] == "--gencfg" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
-		funcDecls := alib.GlobalFindFuncDecls(projectPath, packagePattern)
-		backwardCallGraph := alib.GlobalBuildCallGraph(projectPath, packagePattern, funcDecls)
+		funcDecls := alib.FindFuncDecls(projectPath, packagePattern)
+		backwardCallGraph := alib.BuildCallGraph(projectPath, packagePattern, funcDecls)
 		alib.Generatecfg(backwardCallGraph, "callgraph.js")
 	}
 	if os.Args[1] == "--rootfunctions" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
 		var rootFunctions []string
-		rootFunctions = append(rootFunctions, alib.GlobalFindRootFunctions(projectPath, packagePattern)...)
+		rootFunctions = append(rootFunctions, alib.FindRootFunctions(projectPath, packagePattern)...)
 		fmt.Println("rootfunctions:")
 		for _, fun := range rootFunctions {
 			fmt.Println("\t" + fun)

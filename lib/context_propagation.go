@@ -12,7 +12,13 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func GlobalPropagateContext(projectPath string, packagePattern string, callgraph map[string][]string, rootFunctions []string, funcDecls map[string]bool, passFileSuffix string) {
+func PropagateContext(projectPath string,
+	packagePattern string,
+	callgraph map[string][]string,
+	rootFunctions []string,
+	funcDecls map[string]bool,
+	passFileSuffix string) {
+
 	fset := token.NewFileSet()
 	fmt.Println("PropagateContext")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}

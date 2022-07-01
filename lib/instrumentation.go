@@ -12,7 +12,13 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func GlobalInstrument(projectPath string, packagePattern string, file string, callgraph map[string][]string, rootFunctions []string, passFileSuffix string) {
+func Instrument(projectPath string,
+	packagePattern string,
+	file string,
+	callgraph map[string][]string,
+	rootFunctions []string,
+	passFileSuffix string) {
+
 	fset := token.NewFileSet()
 	fmt.Println("Instrumentation")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
