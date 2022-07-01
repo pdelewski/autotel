@@ -93,6 +93,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					}
 				case *ast.CallExpr:
 					ident, ok := x.Fun.(*ast.Ident)
+
 					if ok {
 						found := funcDecls[ident.Name]
 						_ = found
@@ -131,6 +132,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					// to handle a.b.c.fun()
 					// all selectors have to unpacked
 					sel, ok := x.Fun.(*ast.SelectorExpr)
+
 					if ok {
 						// packageIdent, ok := sel.X.(*ast.Ident)
 						found := funcDecls[sel.Sel.Name]
@@ -159,6 +161,13 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					}
 				case *ast.FuncLit:
 					x.Type.Params.List = append(x.Type.Params.List, ctxField)
+				case *ast.InterfaceType:
+					for _, method := range x.Methods.List {
+						if funcType, ok := method.Type.(*ast.FuncType); ok {
+							funcType.Params.List = append(funcType.Params.List, ctxField)
+
+						}
+					}
 				}
 				return true
 			})
