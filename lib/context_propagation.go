@@ -33,7 +33,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 				continue
 			}
 			astutil.AddImport(fset, node, "context")
-			currentFun := "nil"
+			invokerFun := "nil"
 			ast.Inspect(node, func(n ast.Node) bool {
 				ctxArg := &ast.Ident{
 					Name: "__child_tracing_ctx",
@@ -62,7 +62,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					// 	return false
 					// }
 					// TODO this is not optimap o(n)
-					currentFun = x.Name.Name
+					invokerFun = x.Name.Name
 					exists := false
 					for k, v := range callgraph {
 						if k == x.Name.Name {
@@ -88,7 +88,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 					// fmt.Printf("    type desc         : %+v\n", param.Type)
 					// }
 					visited := map[string]bool{}
-					if isPath(callgraph, currentFun, rootFunctions[0], visited) {
+					if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
 						x.Type.Params.List = append(x.Type.Params.List, ctxField)
 					}
 				case *ast.CallExpr:
@@ -96,7 +96,6 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 
 					if ok {
 						found := funcDecls[ident.Name]
-						_ = found
 						// inject context parameter only
 						// to these functions for which function decl
 						// exists
@@ -106,7 +105,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 							// All have to be checked to be sure whether additional
 							// context parameter needs to be added
 							visited := map[string]bool{}
-							if isPath(callgraph, currentFun, rootFunctions[0], visited) {
+							if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
 								x.Args = append(x.Args, ctxArg)
 							} else {
 								x.Args = append(x.Args, &ast.CallExpr{
@@ -141,7 +140,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 							// All have to be checked to be sure whether additional
 							// context parameter needs to be added
 							visited := map[string]bool{}
-							if isPath(callgraph, currentFun, rootFunctions[0], visited) {
+							if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
 								x.Args = append(x.Args, ctxArg)
 							} else {
 								x.Args = append(x.Args, &ast.CallExpr{
