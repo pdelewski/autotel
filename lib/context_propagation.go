@@ -35,6 +35,10 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 			astutil.AddImport(fset, node, "context")
 			invokerFun := "nil"
 
+			// cache that tells if function was extended with additional
+			// context parameter
+			FunctionsWithContextParams := map[string]bool{}
+
 			emitCallExpr := func(name string, n ast.Node, ctxArg *ast.Ident) {
 				switch x := n.(type) {
 				case *ast.CallExpr:
@@ -51,18 +55,26 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 						if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
 							x.Args = append(x.Args, ctxArg)
 						} else {
-							x.Args = append(x.Args, &ast.CallExpr{
-								Fun: &ast.SelectorExpr{
-									X: &ast.Ident{
-										Name: "context",
+							_, v := FunctionsWithContextParams[name]
+							// if function is not in above map
+							// it means that the path from it to root does not exits
+							// and it was not decorated with context parameter
+							// this is important as there might be functions
+							// invoked from several paths
+							if v {
+								x.Args = append(x.Args, &ast.CallExpr{
+									Fun: &ast.SelectorExpr{
+										X: &ast.Ident{
+											Name: "context",
+										},
+										Sel: &ast.Ident{
+											Name: "TODO",
+										},
 									},
-									Sel: &ast.Ident{
-										Name: "TODO",
-									},
-								},
-								Lparen:   39,
-								Ellipsis: 0,
-							})
+									Lparen:   39,
+									Ellipsis: 0,
+								})
+							}
 						}
 					}
 				}
@@ -116,7 +128,11 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 						break
 					}
 					visited := map[string]bool{}
-					if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
+					// if path from this function to root function exists
+					// it will be decorated with additional context parameter
+					if isPath(callgraph, x.Name.Name, rootFunctions[0], visited) {
+						// all functions with context parameter are stored in below map
+						FunctionsWithContextParams[x.Name.Name] = true
 						x.Type.Params.List = append(x.Type.Params.List, ctxField)
 					}
 				case *ast.CallExpr:
