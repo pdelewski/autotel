@@ -14,7 +14,7 @@ import (
 
 func GlobalInstrument(projectPath string, packagePattern string, file string, callgraph map[string][]string, rootFunctions []string, passFileSuffix string) {
 	fset := token.NewFileSet()
-	fmt.Println("GlobalInstrumentation")
+	fmt.Println("Instrumentation")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
@@ -24,7 +24,7 @@ func GlobalInstrument(projectPath string, packagePattern string, file string, ca
 		fmt.Println("\t", pkg)
 
 		for _, node := range pkg.Syntax {
-			fmt.Println("\t", fset.File(node.Pos()).Name())
+			fmt.Println("\t\t", fset.File(node.Pos()).Name())
 			out, _ := os.Create(fset.File(node.Pos()).Name() + passFileSuffix)
 			defer out.Close()
 

@@ -14,7 +14,7 @@ import (
 
 func GlobalPropagateContext(projectPath string, packagePattern string, callgraph map[string][]string, rootFunctions []string, funcDecls map[string]bool, passFileSuffix string) {
 	fset := token.NewFileSet()
-	fmt.Println("GlobalPropagateContext")
+	fmt.Println("PropagateContext")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
@@ -24,7 +24,7 @@ func GlobalPropagateContext(projectPath string, packagePattern string, callgraph
 		fmt.Println("\t", pkg)
 
 		for _, node := range pkg.Syntax {
-			fmt.Println("\t", fset.File(node.Pos()).Name())
+			fmt.Println("\t\t", fset.File(node.Pos()).Name())
 			out, _ := os.Create(fset.File(node.Pos()).Name() + passFileSuffix)
 			defer out.Close()
 

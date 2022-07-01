@@ -23,7 +23,7 @@ func GlobalFindRootFunctions(projectPath string, packagePattern string) []string
 	var currentFun string
 	var rootFunctions []string
 
-	fmt.Println("GlobalFindRootFunctions")
+	fmt.Println("FindRootFunctions")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
 	if err != nil {
@@ -33,7 +33,7 @@ func GlobalFindRootFunctions(projectPath string, packagePattern string) []string
 		fmt.Println("\t", pkg)
 
 		for _, node := range pkg.Syntax {
-			fmt.Println("\t", fset.File(node.Pos()).Name())
+			fmt.Println("\t\t", fset.File(node.Pos()).Name())
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.CallExpr:
@@ -63,13 +63,13 @@ func GlobalBuildCallGraph(projectPath string, packagePattern string, funcDecls m
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("GlobalBuildCallGraph")
+	fmt.Println("BuildCallGraph")
 	currentFun := "nil"
 	backwardCallGraph := make(map[string][]string)
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
-			fmt.Println("\t", fset.File(node.Pos()).Name())
+			fmt.Println("\t\t", fset.File(node.Pos()).Name())
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.CallExpr:
@@ -106,12 +106,12 @@ func GlobalFindFuncDecls(projectPath string, packagePattern string) map[string]b
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("GlobalFindFuncDecls")
+	fmt.Println("FindFuncDecls")
 	funcDecls := make(map[string]bool)
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
-			fmt.Println("\t", fset.File(node.Pos()).Name())
+			fmt.Println("\t\t", fset.File(node.Pos()).Name())
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
