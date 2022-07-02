@@ -39,11 +39,6 @@ func PropagateContext(projectPath string,
 				continue
 			}
 			astutil.AddImport(fset, node, "context")
-			invokerFun := "nil"
-
-			// cache that tells if function was extended with additional
-			// context parameter
-			FunctionsWithContextParams := map[string]bool{}
 
 			emitCallExpr := func(name string, n ast.Node, ctxArg *ast.Ident) {
 				switch x := n.(type) {
@@ -54,33 +49,9 @@ func PropagateContext(projectPath string,
 					// exists
 
 					if found {
-						// There can be several paths from child function to main one
-						// All have to be checked to be sure whether additional
-						// context parameter needs to be added
 						visited := map[string]bool{}
-						if isPath(callgraph, invokerFun, rootFunctions[0], visited) {
+						if isPath(callgraph, name, rootFunctions[0], visited) {
 							x.Args = append(x.Args, ctxArg)
-						} else {
-							_, v := FunctionsWithContextParams[name]
-							// if function is not in above map
-							// it means that the path from it to root does not exits
-							// and it was not decorated with context parameter
-							// this is important as there might be functions
-							// invoked from several paths
-							if v {
-								x.Args = append(x.Args, &ast.CallExpr{
-									Fun: &ast.SelectorExpr{
-										X: &ast.Ident{
-											Name: "context",
-										},
-										Sel: &ast.Ident{
-											Name: "TODO",
-										},
-									},
-									Lparen:   39,
-									Ellipsis: 0,
-								})
-							}
 						}
 					}
 				}
@@ -114,7 +85,6 @@ func PropagateContext(projectPath string,
 					// 	return false
 					// }
 					// TODO this is not optimap o(n)
-					invokerFun = x.Name.Name
 					exists := false
 					for k, v := range callgraph {
 						if k == x.Name.Name {
@@ -134,11 +104,7 @@ func PropagateContext(projectPath string,
 						break
 					}
 					visited := map[string]bool{}
-					// if path from this function to root function exists
-					// it will be decorated with additional context parameter
 					if isPath(callgraph, x.Name.Name, rootFunctions[0], visited) {
-						// all functions with context parameter are stored in below map
-						FunctionsWithContextParams[x.Name.Name] = true
 						x.Type.Params.List = append(x.Type.Params.List, ctxField)
 					}
 				case *ast.CallExpr:

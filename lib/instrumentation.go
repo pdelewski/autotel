@@ -49,6 +49,42 @@ func Instrument(projectPath string,
 					_, exists := callgraph[x.Name.Name]
 					if !exists {
 						if !Contains(rootFunctions, x.Name.Name) {
+							s1 := &ast.AssignStmt{
+								Lhs: []ast.Expr{
+									&ast.Ident{
+										Name: "__child_tracing_ctx",
+									},
+								},
+								Tok: token.DEFINE,
+								Rhs: []ast.Expr{
+									&ast.CallExpr{
+										Fun: &ast.SelectorExpr{
+											X: &ast.Ident{
+												Name: "context",
+											},
+											Sel: &ast.Ident{
+												Name: "TODO",
+											},
+										},
+										Lparen:   62,
+										Ellipsis: 0,
+									},
+								},
+							}
+							s2 := &ast.AssignStmt{
+								Lhs: []ast.Expr{
+									&ast.Ident{
+										Name: "_",
+									},
+								},
+								Tok: token.ASSIGN,
+								Rhs: []ast.Expr{
+									&ast.Ident{
+										Name: "__child_tracing_ctx",
+									},
+								},
+							}
+							x.Body.List = append([]ast.Stmt{s1, s2}, x.Body.List...)
 							return false
 						}
 					}
@@ -156,6 +192,42 @@ func Instrument(projectPath string,
 						} else {
 							// check whether this function is root function
 							if !Contains(rootFunctions, x.Name.Name) {
+								s1 := &ast.AssignStmt{
+									Lhs: []ast.Expr{
+										&ast.Ident{
+											Name: "__child_tracing_ctx",
+										},
+									},
+									Tok: token.DEFINE,
+									Rhs: []ast.Expr{
+										&ast.CallExpr{
+											Fun: &ast.SelectorExpr{
+												X: &ast.Ident{
+													Name: "context",
+												},
+												Sel: &ast.Ident{
+													Name: "TODO",
+												},
+											},
+											Lparen:   62,
+											Ellipsis: 0,
+										},
+									},
+								}
+								s2 := &ast.AssignStmt{
+									Lhs: []ast.Expr{
+										&ast.Ident{
+											Name: "_",
+										},
+									},
+									Tok: token.ASSIGN,
+									Rhs: []ast.Expr{
+										&ast.Ident{
+											Name: "__child_tracing_ctx",
+										},
+									},
+								}
+								x.Body.List = append([]ast.Stmt{s1, s2}, x.Body.List...)
 								return false
 							}
 							s1 := &ast.ExprStmt{
@@ -345,6 +417,44 @@ func Instrument(projectPath string,
 							}
 							_ = s1
 							x.Body.List = append([]ast.Stmt{s2, s3, s4, s5, s6, s7, s8}, x.Body.List...)
+							{
+								s1 := &ast.AssignStmt{
+									Lhs: []ast.Expr{
+										&ast.Ident{
+											Name: "__child_tracing_ctx",
+										},
+									},
+									Tok: token.DEFINE,
+									Rhs: []ast.Expr{
+										&ast.CallExpr{
+											Fun: &ast.SelectorExpr{
+												X: &ast.Ident{
+													Name: "context",
+												},
+												Sel: &ast.Ident{
+													Name: "TODO",
+												},
+											},
+											Lparen:   62,
+											Ellipsis: 0,
+										},
+									},
+								}
+								s2 := &ast.AssignStmt{
+									Lhs: []ast.Expr{
+										&ast.Ident{
+											Name: "_",
+										},
+									},
+									Tok: token.ASSIGN,
+									Rhs: []ast.Expr{
+										&ast.Ident{
+											Name: "__child_tracing_ctx",
+										},
+									},
+								}
+								x.Body.List = append([]ast.Stmt{s1, s2}, x.Body.List...)
+							}
 						}
 					}
 				case *ast.FuncLit:
