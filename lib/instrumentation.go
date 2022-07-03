@@ -354,19 +354,7 @@ func Instrument(projectPath string,
 									},
 								},
 							}
-							s7 := &ast.AssignStmt{
-								Lhs: []ast.Expr{
-									&ast.Ident{
-										Name: "_",
-									},
-								},
-								Tok: token.ASSIGN,
-								Rhs: []ast.Expr{
-									&ast.Ident{
-										Name: "__child_tracing_ctx",
-									},
-								},
-							}
+
 							s8 := &ast.DeferStmt{
 								Defer: 27,
 								Call: &ast.CallExpr{
@@ -383,7 +371,7 @@ func Instrument(projectPath string,
 								},
 							}
 							_ = s1
-							x.Body.List = append([]ast.Stmt{s2, s3, s4, s5, s6, s7, s8}, x.Body.List...)
+							x.Body.List = append([]ast.Stmt{s2, s3, s4, s5, s6, s8}, x.Body.List...)
 							x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
 
 						}
