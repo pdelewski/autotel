@@ -83,6 +83,7 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 					}
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
+						//fmt.Println("FuncCall:", pkg.TypesInfo.Uses[sel.Sel].String())
 						if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
 							if funcDecls[sel.Sel.Name] == true {
 								backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
@@ -115,6 +116,7 @@ func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
+					//fmt.Println("funcDecl:", pkg.TypesInfo.Defs[x.Name].String())
 					funcDecls[x.Name.Name] = true
 				}
 				return true
