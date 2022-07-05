@@ -10,13 +10,18 @@ type driver struct {
 }
 
 type i interface {
-	foo(p int)
+	foo(p int) int
 }
 
 type impl struct {
 }
 
-func (i impl) foo(p int) {
+func (i impl) foo(p int) int {
+  return 5
+}
+
+func foo(p int) int {
+  return 1
 }
 
 func (d driver) process(a int) {
@@ -30,6 +35,7 @@ func main() {
 	d := driver{}
 	d.process(10)
 	d.e.get(5)
-	i := impl{}
-	i.foo(10)
+	var in i
+	in = impl{}
+	in.foo(10)
 }

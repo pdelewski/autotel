@@ -93,6 +93,7 @@ func Instrument(projectPath string,
 
 					for _, root := range rootFunctions {
 						visited := map[string]bool{}
+						fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 						if isPath(callgraph, x.Name.Name, root, visited) && x.Name.Name != root {
 							s1 := &ast.ExprStmt{
 								X: &ast.CallExpr{

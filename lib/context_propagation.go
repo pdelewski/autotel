@@ -86,12 +86,13 @@ func PropagateContext(projectPath string,
 					// }
 					// TODO this is not optimap o(n)
 					exists := false
+					funName := x.Name.Name
 					for k, v := range callgraph {
-						if k == x.Name.Name {
+						if k == funName {
 							exists = true
 						}
 						for _, e := range v {
-							if x.Name.Name == e {
+							if funName == e {
 								exists = true
 							}
 						}
@@ -100,17 +101,20 @@ func PropagateContext(projectPath string,
 						break
 					}
 
-					if Contains(rootFunctions, x.Name.Name) {
+					if Contains(rootFunctions, funName) {
 						break
 					}
 					visited := map[string]bool{}
-					if isPath(callgraph, x.Name.Name, rootFunctions[0], visited) {
+					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
+					if isPath(callgraph, funName, rootFunctions[0], visited) {
 						x.Type.Params.List = append(x.Type.Params.List, ctxField)
 					}
 				case *ast.CallExpr:
 					ident, ok := x.Fun.(*ast.Ident)
 
 					if ok {
+						fmt.Println("\t\t\tCallExpr:", pkg.TypesInfo.Defs[ident].Id(), pkg.TypesInfo.Defs[ident].Type().String())
+
 						emitCallExpr(ident.Name, n, ctxArg)
 					}
 					_, ok = x.Fun.(*ast.FuncLit)
@@ -131,6 +135,7 @@ func PropagateContext(projectPath string,
 					for _, method := range x.Methods.List {
 						if funcType, ok := method.Type.(*ast.FuncType); ok {
 							visited := map[string]bool{}
+							fmt.Println("\t\t\tInterfaceType", pkg.TypesInfo.Defs[method.Names[0]].Id(), pkg.TypesInfo.Defs[method.Names[0]].Type().String())
 							if isPath(callgraph, method.Names[0].Name, rootFunctions[0], visited) {
 								funcType.Params.List = append(funcType.Params.List, ctxField)
 							}

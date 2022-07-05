@@ -37,9 +37,6 @@ func FindRootFunctions(projectPath string, packagePattern string) []string {
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.CallExpr:
-					_, ok := x.Fun.(*ast.Ident)
-					if ok {
-					}
 					selector, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
 						if selector.Sel.Name == "SumoAutoInstrument" {
@@ -48,6 +45,8 @@ func FindRootFunctions(projectPath string, packagePattern string) []string {
 					}
 				case *ast.FuncDecl:
 					currentFun = x.Name.Name
+					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
+					//currentFun = pkg.TypesInfo.Defs[x.Name].String()
 				}
 				return true
 			})
@@ -75,6 +74,7 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 				case *ast.CallExpr:
 					id, ok := x.Fun.(*ast.Ident)
 					if ok {
+						fmt.Println("\t\t\tFuncCall:", pkg.TypesInfo.Uses[id].Id(), pkg.TypesInfo.Defs[id].Type().String())
 						if !Contains(backwardCallGraph[id.Name], currentFun) {
 							if funcDecls[id.Name] == true {
 								backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
@@ -83,7 +83,7 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 					}
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
-						//fmt.Println("FuncCall:", pkg.TypesInfo.Uses[sel.Sel].String())
+						fmt.Println("\t\t\tFuncCall via selector:", pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String())
 						if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
 							if funcDecls[sel.Sel.Name] == true {
 								backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
@@ -92,6 +92,8 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 					}
 				case *ast.FuncDecl:
 					currentFun = x.Name.Name
+					//currentFun = pkg.TypesInfo.Defs[x.Name].String()
+					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 				}
 				return true
 			})
@@ -116,7 +118,7 @@ func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
-					//fmt.Println("funcDecl:", pkg.TypesInfo.Defs[x.Name].String())
+					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 					funcDecls[x.Name.Name] = true
 				}
 				return true
