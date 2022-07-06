@@ -17,7 +17,7 @@ type FuncDescriptor struct {
 }
 
 func (fd FuncDescriptor) TypeHash() string {
-	return fd.Id
+	return fd.Id + fd.DeclType
 }
 
 const mode packages.LoadMode = packages.NeedName |
@@ -55,7 +55,6 @@ func FindRootFunctions(projectPath string, packagePattern string) []FuncDescript
 				case *ast.FuncDecl:
 					currentFun = FuncDescriptor{x.Name.Name, ""}
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
-					//currentFun = pkg.TypesInfo.Defs[x.Name].String()
 				}
 				return true
 			})
@@ -101,7 +100,6 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 					}
 				case *ast.FuncDecl:
 					currentFun = FuncDescriptor{x.Name.Name, ""}
-					//currentFun = pkg.TypesInfo.Defs[x.Name].String()
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 				}
 				return true
