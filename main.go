@@ -21,7 +21,7 @@ func usage() {
 }
 
 func inject(root string, packagePattern string) {
-	var rootFunctions []string
+	var rootFunctions []alib.FuncDescriptor
 
 	rootFunctions = append(rootFunctions, alib.FindRootFunctions(root, packagePattern)...)
 
@@ -58,22 +58,22 @@ func main() {
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
-		backwardCallGraph := make(map[string][]string)
+		backwardCallGraph := make(map[alib.FuncDescriptor][]alib.FuncDescriptor)
 
 		for scanner.Scan() {
 			line := scanner.Text()
 			keyValue := strings.Split(line, " ")
-			funList := []string{}
+			funList := []alib.FuncDescriptor{}
 			fmt.Print("\n\t", keyValue[0])
 			for i := 1; i < len(keyValue); i++ {
 				fmt.Print(" ", keyValue[i])
-				funList = append(funList, keyValue[i])
+				funList = append(funList, alib.FuncDescriptor{keyValue[i], ""})
 			}
-			backwardCallGraph[keyValue[0]] = funList
+			backwardCallGraph[alib.FuncDescriptor{keyValue[0], ""}] = funList
 		}
 		rootFunctions := alib.InferRootFunctionsFromGraph(backwardCallGraph)
 		for _, v := range rootFunctions {
-			fmt.Println("\nroot:" + v)
+			fmt.Println("\nroot:" + v.TypeHash())
 		}
 		projectPath := os.Args[3]
 		packagePattern := os.Args[4]
@@ -104,11 +104,11 @@ func main() {
 	if os.Args[1] == "--rootfunctions" {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
-		var rootFunctions []string
+		var rootFunctions []alib.FuncDescriptor
 		rootFunctions = append(rootFunctions, alib.FindRootFunctions(projectPath, packagePattern)...)
 		fmt.Println("rootfunctions:")
 		for _, fun := range rootFunctions {
-			fmt.Println("\t" + fun)
+			fmt.Println("\t" + fun.TypeHash())
 		}
 	}
 	if os.Args[1] == "--revert" {

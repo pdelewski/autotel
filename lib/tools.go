@@ -19,7 +19,7 @@ func SearchFiles(root string, ext string) []string {
 	return files
 }
 
-func isPath(callGraph map[string][]string, current string, goal string, visited map[string]bool) bool {
+func isPath(callGraph map[FuncDescriptor][]FuncDescriptor, current FuncDescriptor, goal FuncDescriptor, visited map[FuncDescriptor]bool) bool {
 	if current == goal {
 		return true
 	}
@@ -40,9 +40,9 @@ func isPath(callGraph map[string][]string, current string, goal string, visited 
 	return false
 }
 
-func Contains(a []string, x string) bool {
+func Contains(a []FuncDescriptor, x FuncDescriptor) bool {
 	for _, n := range a {
-		if x == n {
+		if x.TypeHash() == n.TypeHash() {
 			return true
 		}
 	}

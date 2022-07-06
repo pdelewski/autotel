@@ -15,8 +15,8 @@ import (
 func Instrument(projectPath string,
 	packagePattern string,
 	file string,
-	callgraph map[string][]string,
-	rootFunctions []string,
+	callgraph map[FuncDescriptor][]FuncDescriptor,
+	rootFunctions []FuncDescriptor,
 	passFileSuffix string) {
 
 	fset := token.NewFileSet()
@@ -83,18 +83,18 @@ func Instrument(projectPath string,
 					// check if it's root function or
 					// one of function in call graph
 					// and emit proper ast nodes
-					_, exists := callgraph[x.Name.Name]
+					_, exists := callgraph[FuncDescriptor{x.Name.Name, ""}]
 					if !exists {
-						if !Contains(rootFunctions, x.Name.Name) {
+						if !Contains(rootFunctions, FuncDescriptor{x.Name.Name, ""}) {
 							x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
 							return false
 						}
 					}
 
 					for _, root := range rootFunctions {
-						visited := map[string]bool{}
+						visited := map[FuncDescriptor]bool{}
 						fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
-						if isPath(callgraph, x.Name.Name, root, visited) && x.Name.Name != root {
+						if isPath(callgraph, FuncDescriptor{x.Name.Name, ""}, root, visited) && x.Name.Name != root.TypeHash() {
 							s1 := &ast.ExprStmt{
 								X: &ast.CallExpr{
 									Fun: &ast.SelectorExpr{
@@ -194,7 +194,7 @@ func Instrument(projectPath string,
 							x.Body.List = append([]ast.Stmt{s2, s3, s4}, x.Body.List...)
 						} else {
 							// check whether this function is root function
-							if !Contains(rootFunctions, x.Name.Name) {
+							if !Contains(rootFunctions, FuncDescriptor{x.Name.Name, ""}) {
 								x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
 								return false
 							}

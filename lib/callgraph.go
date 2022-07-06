@@ -11,17 +11,26 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+type FuncDescriptor struct {
+	Id       string
+	DeclType string
+}
+
+func (fd FuncDescriptor) TypeHash() string {
+	return fd.Id
+}
+
 const mode packages.LoadMode = packages.NeedName |
 	packages.NeedTypes |
 	packages.NeedSyntax |
 	packages.NeedTypesInfo |
 	packages.NeedFiles
 
-func FindRootFunctions(projectPath string, packagePattern string) []string {
+func FindRootFunctions(projectPath string, packagePattern string) []FuncDescriptor {
 	fset := token.NewFileSet()
 
-	var currentFun string
-	var rootFunctions []string
+	var currentFun FuncDescriptor
+	var rootFunctions []FuncDescriptor
 
 	fmt.Println("FindRootFunctions")
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
@@ -44,7 +53,7 @@ func FindRootFunctions(projectPath string, packagePattern string) []string {
 						}
 					}
 				case *ast.FuncDecl:
-					currentFun = x.Name.Name
+					currentFun = FuncDescriptor{x.Name.Name, ""}
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 					//currentFun = pkg.TypesInfo.Defs[x.Name].String()
 				}
@@ -55,7 +64,7 @@ func FindRootFunctions(projectPath string, packagePattern string) []string {
 	return rootFunctions
 }
 
-func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[string][]string {
+func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[FuncDescriptor][]FuncDescriptor {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
@@ -63,8 +72,8 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 		log.Fatal(err)
 	}
 	fmt.Println("BuildCallGraph")
-	currentFun := "nil"
-	backwardCallGraph := make(map[string][]string)
+	currentFun := FuncDescriptor{"nil", ""}
+	backwardCallGraph := make(map[FuncDescriptor][]FuncDescriptor)
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
@@ -74,24 +83,24 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 				case *ast.CallExpr:
 					id, ok := x.Fun.(*ast.Ident)
 					if ok {
-						fmt.Println("\t\t\tFuncCall:", pkg.TypesInfo.Uses[id].Id(), pkg.TypesInfo.Defs[id].Type().String())
-						if !Contains(backwardCallGraph[id.Name], currentFun) {
+						fmt.Println("\t\t\tFuncCall:", pkg.TypesInfo.Uses[id].Id(), pkg.TypesInfo.Uses[id].Type().String())
+						if !Contains(backwardCallGraph[FuncDescriptor{id.Name, ""}], currentFun) {
 							if funcDecls[id.Name] == true {
-								backwardCallGraph[id.Name] = append(backwardCallGraph[id.Name], currentFun)
+								backwardCallGraph[FuncDescriptor{id.Name, ""}] = append(backwardCallGraph[FuncDescriptor{id.Name, ""}], currentFun)
 							}
 						}
 					}
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
 						fmt.Println("\t\t\tFuncCall via selector:", pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String())
-						if !Contains(backwardCallGraph[sel.Sel.Name], currentFun) {
+						if !Contains(backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}], currentFun) {
 							if funcDecls[sel.Sel.Name] == true {
-								backwardCallGraph[sel.Sel.Name] = append(backwardCallGraph[sel.Sel.Name], currentFun)
+								backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}] = append(backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}], currentFun)
 							}
 						}
 					}
 				case *ast.FuncDecl:
-					currentFun = x.Name.Name
+					currentFun = FuncDescriptor{x.Name.Name, ""}
 					//currentFun = pkg.TypesInfo.Defs[x.Name].String()
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 				}
@@ -128,10 +137,10 @@ func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 	return funcDecls
 }
 
-func InferRootFunctionsFromGraph(callgraph map[string][]string) []string {
-	var allFunctions map[string]bool
-	var rootFunctions []string
-	allFunctions = make(map[string]bool)
+func InferRootFunctionsFromGraph(callgraph map[FuncDescriptor][]FuncDescriptor) []FuncDescriptor {
+	var allFunctions map[FuncDescriptor]bool
+	var rootFunctions []FuncDescriptor
+	allFunctions = make(map[FuncDescriptor]bool)
 	for k, v := range callgraph {
 		allFunctions[k] = true
 		for _, childFun := range v {
@@ -157,8 +166,8 @@ func InferRootFunctionsFromGraph(callgraph map[string][]string) []string {
 //     ]
 // };
 
-func Generatecfg(callgraph map[string][]string, path string) {
-	functions := make(map[string]bool, 0)
+func Generatecfg(callgraph map[FuncDescriptor][]FuncDescriptor, path string) {
+	functions := make(map[FuncDescriptor]bool, 0)
 	for k, childFuns := range callgraph {
 		if functions[k] == false {
 			functions[k] = true
@@ -181,7 +190,7 @@ func Generatecfg(callgraph map[string][]string, path string) {
 	out.WriteString("\n\tnodes: [")
 	for f := range functions {
 		out.WriteString("\n\t\t { data: { id: '")
-		out.WriteString(f)
+		out.WriteString(f.TypeHash())
 		out.WriteString("' } },")
 	}
 	out.WriteString("\n\t],")
@@ -194,11 +203,11 @@ func Generatecfg(callgraph map[string][]string, path string) {
 			out.WriteString("', ")
 			out.WriteString("source: '")
 
-			out.WriteString(childFun)
+			out.WriteString(childFun.TypeHash())
 
 			out.WriteString("', ")
 			out.WriteString("target: '")
-			out.WriteString(k)
+			out.WriteString(k.TypeHash())
 			out.WriteString("' ")
 			out.WriteString("} },")
 			edgeCounter++

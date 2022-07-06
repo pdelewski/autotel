@@ -14,8 +14,8 @@ import (
 
 func PropagateContext(projectPath string,
 	packagePattern string,
-	callgraph map[string][]string,
-	rootFunctions []string,
+	callgraph map[FuncDescriptor][]FuncDescriptor,
+	rootFunctions []FuncDescriptor,
 	funcDecls map[string]bool,
 	passFileSuffix string) {
 
@@ -49,8 +49,8 @@ func PropagateContext(projectPath string,
 					// exists
 
 					if found {
-						visited := map[string]bool{}
-						if isPath(callgraph, name, rootFunctions[0], visited) {
+						visited := map[FuncDescriptor]bool{}
+						if isPath(callgraph, FuncDescriptor{name, ""}, rootFunctions[0], visited) {
 							x.Args = append(x.Args, ctxArg)
 						}
 					}
@@ -88,11 +88,11 @@ func PropagateContext(projectPath string,
 					exists := false
 					funName := x.Name.Name
 					for k, v := range callgraph {
-						if k == funName {
+						if k.TypeHash() == funName {
 							exists = true
 						}
 						for _, e := range v {
-							if funName == e {
+							if funName == e.TypeHash() {
 								exists = true
 							}
 						}
@@ -101,19 +101,19 @@ func PropagateContext(projectPath string,
 						break
 					}
 
-					if Contains(rootFunctions, funName) {
+					if Contains(rootFunctions, FuncDescriptor{funName, ""}) {
 						break
 					}
-					visited := map[string]bool{}
+					visited := map[FuncDescriptor]bool{}
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
-					if isPath(callgraph, funName, rootFunctions[0], visited) {
+					if isPath(callgraph, FuncDescriptor{funName, ""}, rootFunctions[0], visited) {
 						x.Type.Params.List = append(x.Type.Params.List, ctxField)
 					}
 				case *ast.CallExpr:
 					ident, ok := x.Fun.(*ast.Ident)
 
 					if ok {
-						fmt.Println("\t\t\tCallExpr:", pkg.TypesInfo.Defs[ident].Id(), pkg.TypesInfo.Defs[ident].Type().String())
+						fmt.Println("\t\t\tCallExpr:", pkg.TypesInfo.Uses[ident].Id(), pkg.TypesInfo.Uses[ident].Type().String())
 
 						emitCallExpr(ident.Name, n, ctxArg)
 					}
@@ -134,9 +134,9 @@ func PropagateContext(projectPath string,
 				case *ast.InterfaceType:
 					for _, method := range x.Methods.List {
 						if funcType, ok := method.Type.(*ast.FuncType); ok {
-							visited := map[string]bool{}
+							visited := map[FuncDescriptor]bool{}
 							fmt.Println("\t\t\tInterfaceType", pkg.TypesInfo.Defs[method.Names[0]].Id(), pkg.TypesInfo.Defs[method.Names[0]].Type().String())
-							if isPath(callgraph, method.Names[0].Name, rootFunctions[0], visited) {
+							if isPath(callgraph, FuncDescriptor{method.Names[0].Name, ""}, rootFunctions[0], visited) {
 								funcType.Params.List = append(funcType.Params.List, ctxField)
 							}
 

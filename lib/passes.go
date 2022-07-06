@@ -7,9 +7,9 @@ const (
 
 func ExecutePasses(projectPath string,
 	packagePattern string,
-	rootFunctions []string,
+	rootFunctions []FuncDescriptor,
 	funcDecls map[string]bool,
-	backwardCallGraph map[string][]string) {
+	backwardCallGraph map[FuncDescriptor][]FuncDescriptor) {
 
 	PropagateContext(projectPath,
 		packagePattern,
