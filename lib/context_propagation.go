@@ -40,17 +40,17 @@ func PropagateContext(projectPath string,
 			}
 			astutil.AddImport(fset, node, "context")
 
-			emitCallExpr := func(name string, n ast.Node, ctxArg *ast.Ident) {
+			emitCallExpr := func(ident *ast.Ident, n ast.Node, ctxArg *ast.Ident) {
 				switch x := n.(type) {
 				case *ast.CallExpr:
-					found := funcDecls[name]
+					found := funcDecls[ident.Name]
 					// inject context parameter only
 					// to these functions for which function decl
 					// exists
 
 					if found {
 						visited := map[FuncDescriptor]bool{}
-						if isPath(callgraph, FuncDescriptor{name, ""}, rootFunctions[0], visited) {
+						if isPath(callgraph, FuncDescriptor{ident.Name, ""}, rootFunctions[0], visited) {
 							x.Args = append(x.Args, ctxArg)
 						}
 					}
@@ -115,7 +115,7 @@ func PropagateContext(projectPath string,
 					if ok {
 						fmt.Println("\t\t\tCallExpr:", pkg.TypesInfo.Uses[ident].Id(), pkg.TypesInfo.Uses[ident].Type().String())
 
-						emitCallExpr(ident.Name, n, ctxArg)
+						emitCallExpr(ident, n, ctxArg)
 					}
 					_, ok = x.Fun.(*ast.FuncLit)
 					if ok {
@@ -127,7 +127,7 @@ func PropagateContext(projectPath string,
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 
 					if ok {
-						emitCallExpr(sel.Sel.Name, n, ctxArg)
+						emitCallExpr(sel.Sel, n, ctxArg)
 					}
 				case *ast.FuncLit:
 					x.Type.Params.List = append(x.Type.Params.List, ctxField)
