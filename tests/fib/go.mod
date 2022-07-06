@@ -1,4 +1,4 @@
-module github.com/pdelewski/autotel/examples/fib
+module github.com/pdelewski/autotel/tests/fib
 
 go 1.18
 

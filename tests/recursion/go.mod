@@ -1,4 +1,4 @@
-module github.com/pdelewski/autotel/examples/methods
+module github.com/pdelewski/autotel/tests/recursion
 
 go 1.18
 

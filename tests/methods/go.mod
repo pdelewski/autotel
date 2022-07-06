@@ -1,4 +1,4 @@
-module github.com/pdelewski/autotel/examples/goroutines
+module github.com/pdelewski/autotel/tests/methods
 
 go 1.18
 
