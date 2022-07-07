@@ -15,12 +15,12 @@
 package main
 
 import (
-	"fmt"
+    "fmt"
 
-	"github.com/pdelewski/autotel/rtlib"
+    "github.com/pdelewski/autotel/rtlib"
 )
 
 func main() {
-	rtlib.SumoAutoInstrument()
-	fmt.Println(FibonacciHelper(10))
+    rtlib.SumoAutoInstrument()
+    fmt.Println(FibonacciHelper(10))
 }
