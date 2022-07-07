@@ -1,0 +1,17 @@
+package main
+
+import (
+	"github.com/pdelewski/autotel/rtlib"
+	"context"
+)
+
+func recur(n int, __tracing_ctx context.Context) {
+	if n > 0 {
+		recur(n-1, __child_tracing_ctx)
+	}
+}
+
+func main() {
+	rtlib.SumoAutoInstrument()
+	recur(5, __child_tracing_ctx)
+}

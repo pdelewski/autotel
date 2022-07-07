@@ -1,0 +1,44 @@
+package main
+
+import (
+	"github.com/pdelewski/autotel/rtlib"
+	"context"
+)
+
+type element struct {
+}
+
+type driver struct {
+	e element
+}
+
+type i interface {
+	foo(p int, __tracing_ctx context.Context,) int
+}
+
+type impl struct {
+}
+
+func (i impl) foo(p int, __tracing_ctx context.Context,) int {
+	return 5
+}
+
+func foo(p int, __tracing_ctx context.Context,) int {
+	return 1
+}
+
+func (d driver) process(a int, __tracing_ctx context.Context,) {
+}
+
+func (e element) get(a int, __tracing_ctx context.Context,) {
+}
+
+func main() {
+	rtlib.SumoAutoInstrument()
+	d := driver{}
+	d.process(10, __child_tracing_ctx)
+	d.e.get(5, __child_tracing_ctx)
+	var in i
+	in = impl{}
+	in.foo(10, __child_tracing_ctx)
+}

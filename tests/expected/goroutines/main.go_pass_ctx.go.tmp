@@ -1,0 +1,22 @@
+package main
+
+import (
+	"fmt"
+	"context"
+	"github.com/pdelewski/autotel/rtlib"
+)
+
+func foo(__tracing_ctx context.Context)	{}
+
+func main() {
+	rtlib.SumoAutoInstrument()
+	messages := make(chan string)
+
+	go func(__tracing_ctx context.Context,) { messages <- "ping" }(__child_tracing_ctx)
+
+	foo(__child_tracing_ctx)
+
+	msg := <-messages
+	fmt.Println(msg)
+
+}
