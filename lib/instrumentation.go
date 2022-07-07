@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
@@ -83,9 +84,12 @@ func Instrument(projectPath string,
 					// check if it's root function or
 					// one of function in call graph
 					// and emit proper ast nodes
-					_, exists := callgraph[FuncDescriptor{x.Name.Name, ""}]
+					fun := FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}
+					fun.DeclType = strings.ReplaceAll(fun.DeclType, "(__tracing_ctx context.Context", "(")
+					fun.DeclType = strings.ReplaceAll(fun.DeclType, ", __tracing_ctx context.Context", "")
+					_, exists := callgraph[fun]
 					if !exists {
-						if !Contains(rootFunctions, FuncDescriptor{x.Name.Name, ""}) {
+						if !Contains(rootFunctions, fun) {
 							x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
 							return false
 						}
@@ -93,8 +97,9 @@ func Instrument(projectPath string,
 
 					for _, root := range rootFunctions {
 						visited := map[FuncDescriptor]bool{}
+
 						fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
-						if isPath(callgraph, FuncDescriptor{x.Name.Name, ""}, root, visited) && x.Name.Name != root.TypeHash() {
+						if isPath(callgraph, fun, root, visited) && fun.TypeHash() != root.TypeHash() {
 							s1 := &ast.ExprStmt{
 								X: &ast.CallExpr{
 									Fun: &ast.SelectorExpr{
@@ -194,7 +199,7 @@ func Instrument(projectPath string,
 							x.Body.List = append([]ast.Stmt{s2, s3, s4}, x.Body.List...)
 						} else {
 							// check whether this function is root function
-							if !Contains(rootFunctions, FuncDescriptor{x.Name.Name, ""}) {
+							if !Contains(rootFunctions, fun) {
 								x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
 								return false
 							}

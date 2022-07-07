@@ -53,7 +53,7 @@ func FindRootFunctions(projectPath string, packagePattern string) []FuncDescript
 						}
 					}
 				case *ast.FuncDecl:
-					currentFun = FuncDescriptor{x.Name.Name, ""}
+					currentFun = FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 				}
 				return true
@@ -83,23 +83,25 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[Fun
 					id, ok := x.Fun.(*ast.Ident)
 					if ok {
 						fmt.Println("\t\t\tFuncCall:", pkg.TypesInfo.Uses[id].Id(), pkg.TypesInfo.Uses[id].Type().String())
-						if !Contains(backwardCallGraph[FuncDescriptor{id.Name, ""}], currentFun) {
-							if funcDecls[FuncDescriptor{id.Name, ""}] == true {
-								backwardCallGraph[FuncDescriptor{id.Name, ""}] = append(backwardCallGraph[FuncDescriptor{id.Name, ""}], currentFun)
+						fun := FuncDescriptor{pkg.TypesInfo.Uses[id].Id(), pkg.TypesInfo.Uses[id].Type().String()}
+						if !Contains(backwardCallGraph[fun], currentFun) {
+							if funcDecls[fun] == true {
+								backwardCallGraph[fun] = append(backwardCallGraph[fun], currentFun)
 							}
 						}
 					}
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
 						fmt.Println("\t\t\tFuncCall via selector:", pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String())
-						if !Contains(backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}], currentFun) {
-							if funcDecls[FuncDescriptor{sel.Sel.Name, ""}] == true {
-								backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}] = append(backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}], currentFun)
+						fun := FuncDescriptor{pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String()}
+						if !Contains(backwardCallGraph[fun], currentFun) {
+							if funcDecls[fun] == true {
+								backwardCallGraph[fun] = append(backwardCallGraph[fun], currentFun)
 							}
 						}
 					}
 				case *ast.FuncDecl:
-					currentFun = FuncDescriptor{x.Name.Name, ""}
+					currentFun = FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
 				}
 				return true
@@ -126,7 +128,7 @@ func FindFuncDecls(projectPath string, packagePattern string) map[FuncDescriptor
 				switch x := n.(type) {
 				case *ast.FuncDecl:
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
-					funcDecls[FuncDescriptor{x.Name.Name, ""}] = true
+					funcDecls[FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}] = true
 				}
 				return true
 			})
