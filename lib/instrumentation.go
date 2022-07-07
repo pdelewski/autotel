@@ -81,12 +81,17 @@ func Instrument(projectPath string,
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
+					fun := FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}
+					// that's kind a trick
+					// context propagation pass adds additional context parameter
+					// this additional parameter has to be removed to match
+					// what's already in function callgraph
+					fun.DeclType = strings.ReplaceAll(fun.DeclType, "(__tracing_ctx context.Context", "(")
+					fun.DeclType = strings.ReplaceAll(fun.DeclType, ", __tracing_ctx context.Context", "")
+
 					// check if it's root function or
 					// one of function in call graph
 					// and emit proper ast nodes
-					fun := FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}
-					fun.DeclType = strings.ReplaceAll(fun.DeclType, "(__tracing_ctx context.Context", "(")
-					fun.DeclType = strings.ReplaceAll(fun.DeclType, ", __tracing_ctx context.Context", "")
 					_, exists := callgraph[fun]
 					if !exists {
 						if !Contains(rootFunctions, fun) {
