@@ -63,7 +63,7 @@ func FindRootFunctions(projectPath string, packagePattern string) []FuncDescript
 	return rootFunctions
 }
 
-func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[string]bool) map[FuncDescriptor][]FuncDescriptor {
+func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[FuncDescriptor]bool) map[FuncDescriptor][]FuncDescriptor {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
@@ -84,7 +84,7 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 					if ok {
 						fmt.Println("\t\t\tFuncCall:", pkg.TypesInfo.Uses[id].Id(), pkg.TypesInfo.Uses[id].Type().String())
 						if !Contains(backwardCallGraph[FuncDescriptor{id.Name, ""}], currentFun) {
-							if funcDecls[id.Name] == true {
+							if funcDecls[FuncDescriptor{id.Name, ""}] == true {
 								backwardCallGraph[FuncDescriptor{id.Name, ""}] = append(backwardCallGraph[FuncDescriptor{id.Name, ""}], currentFun)
 							}
 						}
@@ -93,7 +93,7 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 					if ok {
 						fmt.Println("\t\t\tFuncCall via selector:", pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String())
 						if !Contains(backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}], currentFun) {
-							if funcDecls[sel.Sel.Name] == true {
+							if funcDecls[FuncDescriptor{sel.Sel.Name, ""}] == true {
 								backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}] = append(backwardCallGraph[FuncDescriptor{sel.Sel.Name, ""}], currentFun)
 							}
 						}
@@ -109,7 +109,7 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[str
 	return backwardCallGraph
 }
 
-func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
+func FindFuncDecls(projectPath string, packagePattern string) map[FuncDescriptor]bool {
 	fset := token.NewFileSet()
 	cfg := &packages.Config{Fset: fset, Mode: mode, Dir: projectPath}
 	pkgs, err := packages.Load(cfg, packagePattern)
@@ -117,7 +117,7 @@ func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 		log.Fatal(err)
 	}
 	fmt.Println("FindFuncDecls")
-	funcDecls := make(map[string]bool)
+	funcDecls := make(map[FuncDescriptor]bool)
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
 		for _, node := range pkg.Syntax {
@@ -126,7 +126,7 @@ func FindFuncDecls(projectPath string, packagePattern string) map[string]bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
 					fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
-					funcDecls[x.Name.Name] = true
+					funcDecls[FuncDescriptor{x.Name.Name, ""}] = true
 				}
 				return true
 			})

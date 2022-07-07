@@ -16,7 +16,7 @@ func PropagateContext(projectPath string,
 	packagePattern string,
 	callgraph map[FuncDescriptor][]FuncDescriptor,
 	rootFunctions []FuncDescriptor,
-	funcDecls map[string]bool,
+	funcDecls map[FuncDescriptor]bool,
 	passFileSuffix string) {
 
 	fset := token.NewFileSet()
@@ -43,7 +43,7 @@ func PropagateContext(projectPath string,
 			emitCallExpr := func(ident *ast.Ident, n ast.Node, ctxArg *ast.Ident) {
 				switch x := n.(type) {
 				case *ast.CallExpr:
-					found := funcDecls[ident.Name]
+					found := funcDecls[FuncDescriptor{ident.Name, ""}]
 					// inject context parameter only
 					// to these functions for which function decl
 					// exists
