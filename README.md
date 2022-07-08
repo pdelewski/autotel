@@ -36,6 +36,13 @@ specific package as well
 
 ## How it works
 
+There are few passes during execution. 
+1. Search for entry point, a function definition with ```AutotelEntryPoint__()``` call.
+2. Building call graph. Traversing all calls from entry point through all function definitions.
+3. Context propagation. Adding additional context parameter to all function declarations and function call expressions that are visible
+   (it will not add context argument to call expression without having visible function declaration).
+4. Injecting open telemetry calls into functions bodies.
+
 ![image info](./sets.png)
 
 ## Project Status
