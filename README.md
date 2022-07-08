@@ -1,7 +1,7 @@
 # OpenTelemetry source level automatic instrumentation
 
 This project adds OpenTelemetry instrumentation (https://github.com/open-telemetry/opentelemetry-go) 
-to Go applications by automatically modifying their source code.
+to Go applications by automatically modifying their source code in similar way as compiler.
 It can instrument any golang project. It depends only on standard libraries and is platform agnostic.
 
 ## How to use it
