@@ -36,6 +36,8 @@ specific package as well
 
 ## How it works
 
+![image info](./sets.png)
+
 ## Project Status
 This project is actively maintained by Sumo Logic and is currently in it's initial days. We would love to receive your ideas, feedback & contributions.
 
