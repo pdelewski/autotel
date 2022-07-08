@@ -75,6 +75,6 @@ func Shutdown(ts TracingState) {
 	}
 }
 
-func SumoAutoInstrument() {
+func __autotelEntryPoint() {
 
 }
