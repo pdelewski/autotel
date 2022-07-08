@@ -12,6 +12,6 @@ func recur(n int, __tracing_ctx context.Context) {
 }
 
 func main() {
-	rtlib.SumoAutoInstrument()
+	rtlib.AutotelEntryPoint__()
 	recur(5, __child_tracing_ctx)
 }

@@ -31,6 +31,6 @@ func main() {
 	ctx := context.Background()
 	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
 	defer span.End()
-	rtlib.SumoAutoInstrument()
+	rtlib.AutotelEntryPoint__()
 	fmt.Println(FibonacciHelper(10, __child_tracing_ctx))
 }

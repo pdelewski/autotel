@@ -2,7 +2,7 @@ module github.com/pdelewski/autotel/tests/fib
 
 go 1.18
 
-require github.com/pdelewski/autotel v0.0.0-20220628075413-42abaaa258ff
+require github.com/pdelewski/autotel v0.1.0
 
 require (
 	github.com/go-logr/logr v1.2.3 // indirect

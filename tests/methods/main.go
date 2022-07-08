@@ -31,7 +31,7 @@ func (e element) get(a int) {
 }
 
 func main() {
-	rtlib.SumoAutoInstrument()
+	rtlib.AutotelEntryPoint__()
 	d := driver{}
 	d.process(10)
 	d.e.get(5)

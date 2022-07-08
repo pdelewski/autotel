@@ -21,6 +21,6 @@ import (
 )
 
 func main() {
-    rtlib.SumoAutoInstrument()
+    rtlib.AutotelEntryPoint__()
     fmt.Println(FibonacciHelper(10))
 }

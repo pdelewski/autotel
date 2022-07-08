@@ -9,6 +9,6 @@ func recur(n int) {
 }
 
 func main() {
-	rtlib.SumoAutoInstrument()
+	rtlib.AutotelEntryPoint__()
 	recur(5)
 }

@@ -22,7 +22,7 @@ func main() {
 	ctx := context.Background()
 	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
 	defer span.End()
-	rtlib.SumoAutoInstrument()
+	rtlib.AutotelEntryPoint__()
 	messages := make(chan string)
 
 	go func(__tracing_ctx context.Context) {

@@ -22,6 +22,6 @@ import (
 )
 
 func main() {
-	rtlib.SumoAutoInstrument()
+	rtlib.AutotelEntryPoint__()
 	fmt.Println(FibonacciHelper(10, __child_tracing_ctx))
 }
