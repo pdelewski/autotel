@@ -6,7 +6,14 @@ It can instrument any golang project. It depends only on standard libraries and 
 
 ## How to use it
 
-To inject open telemetry calls autotel requires three parameters: command, path to project and package(s) pattern we 
+In order to instrument your project you have to add following call in your entry point function, usually main
+(you can look at tests directory for reference) and invoke autotel tool.
+
+```
+	rtlib.AutotelEntryPoint__()
+```
+
+Autotel requires three parameters: command, path to project and package(s) pattern we 
 would like to instrument.
 
 ```
