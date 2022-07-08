@@ -10,7 +10,8 @@ In order to instrument your project you have to add following call in your entry
 (you can look at tests directory for reference) and invoke autotel tool.
 
 ```
-	rtlib.AutotelEntryPoint__()
+func main() {
+    rtlib.AutotelEntryPoint__()
 ```
 
 Autotel requires three parameters: command, path to project and package(s) pattern we 
