@@ -75,6 +75,6 @@ func Shutdown(ts TracingState) {
 	}
 }
 
-func __autotelEntryPoint() {
+func AutotelEntryPoint__() {
 
 }

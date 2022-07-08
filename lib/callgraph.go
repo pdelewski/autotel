@@ -48,7 +48,7 @@ func FindRootFunctions(projectPath string, packagePattern string) []FuncDescript
 				case *ast.CallExpr:
 					selector, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
-						if selector.Sel.Name == "__autotelEntryPoint" {
+						if selector.Sel.Name == "AutotelEntryPoint__" {
 							rootFunctions = append(rootFunctions, currentFun)
 						}
 					}
