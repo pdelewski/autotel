@@ -1,8 +1,7 @@
-# autotel
-Automatic manual tracing :)
-The aim of this project is to show how golang can be used to automatically inject 
-open telemetry tracing (https://github.com/open-telemetry/opentelemetry-go).
-It's also a place where compiler meet open telemetry.
+# OpenTelemetry source level automatic instrumentation
+
+This project adds OpenTelemetry instrumentation (https://github.com/open-telemetry/opentelemetry-go) 
+to Go applications by automatically modifying their source code.
 
 ## How to use it
 
@@ -12,67 +11,11 @@ It's also a place where compiler meet open telemetry.
 
 ## How it works
 
-autotel will search for all root functions anotated with following call
+## Project Status
+This project is actively maintained by Sumo Logic and is currently in it's initial days. We would love to receive your ideas, feedback & contributions.
 
-```
-	rtlib.SumoAutoInstrument()
-```
+## Contributing
+We welcome issues, questions, and pull requests.
 
-where rtlib is small runtime library. Then all function calls starting from this function will be 
-intrumented automatically. Example, below
-
-```
-package main
-
-import (
-	"fmt"
-
-	"sumologic.com/autotel/rtlib"
-)
-
-func main() {
-	rtlib.SumoAutoInstrument()
-	fmt.Println(FibonacciHelper(10))
-}
-```
-
-Result after autotel invocation
-
-```
-package main
-
-import (
-	"fmt"
-	"context"
-
-	"sumologic.com/autotel/rtlib"
-	otel "go.opentelemetry.io/otel"
-)
-
-func main() {
-	fmt.Println("root instrumentation")
-	ts := rtlib.NewTracingState()
-	defer func() {
-		if err := ts.Tp.Shutdown(context.Backgroud()); err != nil {
-			ts.Logger.Fatal(err)
-		}
-	}()
-	otel.SetTracerProvider(ts.Tp)
-	ctx := context.Background()
-	_, span := otel.Tracer("main").Start(ctx, "main")
-	defer func() { span.End() }()
-
-	rtlib.SumoAutoInstrument()
-	fmt.Println(FibonacciHelper(10))
-}
-```
-
-We can imagine other methods to say what needs to be instrumented (by argument(s) passed to autotel or configuration file).
-
-## Scenarios
-- ordinary function chain
-- anonymous functions
-- goroutines with named and anonymous functions (without context)
-- goroutines with explicit context 
-- interprocess context propagation explicitly with context object
-- interprocess context propagation handmade without using context
+## License
+This project is licensed under the terms of the MIT license. Please refer to LICENSE for the full terms.
