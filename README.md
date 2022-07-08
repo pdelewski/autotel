@@ -19,7 +19,7 @@ Below concrete example with one of test instrumentation that is part of the proj
 ./autotel --inject ./tests/fib ./...
 ```
 
-./... works like wildcard in this case and it will instrument all packages in this path, but it can be invoked with
+```./...``` works like wildcard in this case and it will instrument all packages in this path, but it can be invoked with
 specific package as well
 
 ```
