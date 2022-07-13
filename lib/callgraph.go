@@ -92,11 +92,13 @@ func BuildCallGraph(projectPath string, packagePattern string, funcDecls map[Fun
 					}
 					sel, ok := x.Fun.(*ast.SelectorExpr)
 					if ok {
-						fmt.Println("\t\t\tFuncCall via selector:", pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String())
-						fun := FuncDescriptor{pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String()}
-						if !Contains(backwardCallGraph[fun], currentFun) {
-							if funcDecls[fun] == true {
-								backwardCallGraph[fun] = append(backwardCallGraph[fun], currentFun)
+						if pkg.TypesInfo.Uses[sel.Sel] != nil {
+							fmt.Println("\t\t\tFuncCall via selector:", pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String())
+							fun := FuncDescriptor{pkg.TypesInfo.Uses[sel.Sel].Id(), pkg.TypesInfo.Uses[sel.Sel].Type().String()}
+							if !Contains(backwardCallGraph[fun], currentFun) {
+								if funcDecls[fun] == true {
+									backwardCallGraph[fun] = append(backwardCallGraph[fun], currentFun)
+								}
 							}
 						}
 					}

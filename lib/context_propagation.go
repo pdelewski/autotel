@@ -43,17 +43,19 @@ func PropagateContext(projectPath string,
 			emitCallExpr := func(ident *ast.Ident, n ast.Node, ctxArg *ast.Ident) {
 				switch x := n.(type) {
 				case *ast.CallExpr:
-					fun := FuncDescriptor{pkg.TypesInfo.Uses[ident].Id(),
-						pkg.TypesInfo.Uses[ident].Type().String()}
-					found := funcDecls[fun]
-					// inject context parameter only
-					// to these functions for which function decl
-					// exists
+					if pkg.TypesInfo.Uses[ident] != nil {
+						fun := FuncDescriptor{pkg.TypesInfo.Uses[ident].Id(),
+							pkg.TypesInfo.Uses[ident].Type().String()}
+						found := funcDecls[fun]
+						// inject context parameter only
+						// to these functions for which function decl
+						// exists
 
-					if found {
-						visited := map[FuncDescriptor]bool{}
-						if isPath(callgraph, fun, rootFunctions[0], visited) {
-							x.Args = append(x.Args, ctxArg)
+						if found {
+							visited := map[FuncDescriptor]bool{}
+							if isPath(callgraph, fun, rootFunctions[0], visited) {
+								x.Args = append(x.Args, ctxArg)
+							}
 						}
 					}
 				}
