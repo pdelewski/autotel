@@ -13,6 +13,7 @@ func usage() {
 	fmt.Println("\nusage autotel --command [path to go project] [package pattern]")
 	fmt.Println("\tcommand:")
 	fmt.Println("\t\tinject                                 (injects open telemetry calls into project code)")
+	fmt.Println("\t\tinject-dump-ir                         (injects open telemetry calls into project code and intermediate passes)")
 	fmt.Println("\t\tinject-using-graph graph-file          (injects open telemetry calls into project code using provided graph information)")
 	fmt.Println("\t\tdumpcfg                                (dumps control flow graph)")
 	fmt.Println("\t\tgencfg                                 (generates json representation of control flow graph)")
@@ -31,6 +32,17 @@ func inject(root string, packagePattern string) {
 	alib.ExecutePasses(root, packagePattern, rootFunctions, funcDecls, backwardCallGraph)
 }
 
+func injectAndDumpIr(root string, packagePattern string) {
+	var rootFunctions []alib.FuncDescriptor
+
+	rootFunctions = append(rootFunctions, alib.FindRootFunctions(root, packagePattern)...)
+
+	funcDecls := alib.FindFuncDecls(root, packagePattern)
+	backwardCallGraph := alib.BuildCallGraph(root, packagePattern, funcDecls)
+
+	alib.ExecutePassesDumpIr(root, packagePattern, rootFunctions, funcDecls, backwardCallGraph)
+}
+
 // Parsing algorithm works as follows. It goes through all function
 // decls and infer function bodies to find call to SumoAutoInstrument
 // A parent function of this call will become root of instrumentation
@@ -47,6 +59,12 @@ func main() {
 		projectPath := os.Args[2]
 		packagePattern := os.Args[3]
 		inject(projectPath, packagePattern)
+		fmt.Println("\tinstrumentation done")
+	}
+	if os.Args[1] == "--inject-dump-ir" {
+		projectPath := os.Args[2]
+		packagePattern := os.Args[3]
+		injectAndDumpIr(projectPath, packagePattern)
 		fmt.Println("\tinstrumentation done")
 	}
 	if os.Args[1] == "--inject-using-graph" {

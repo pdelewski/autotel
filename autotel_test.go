@@ -22,7 +22,7 @@ var testcases = map[string]string{
 func Test(t *testing.T) {
 
 	for k, v := range testcases {
-		inject(k, "./...")
+		injectAndDumpIr(k, "./...")
 		files := lib.SearchFiles(k, ".go")
 		expectedFiles := lib.SearchFiles(v, ".go")
 

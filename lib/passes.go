@@ -5,7 +5,7 @@ const (
 	instrumentationPassFileSuffix = "_pass_tracing.go"
 )
 
-func ExecutePasses(projectPath string,
+func ExecutePassesDumpIr(projectPath string,
 	packagePattern string,
 	rootFunctions []FuncDescriptor,
 	funcDecls map[FuncDescriptor]bool,
@@ -24,4 +24,25 @@ func ExecutePasses(projectPath string,
 		backwardCallGraph,
 		rootFunctions,
 		instrumentationPassFileSuffix)
+}
+
+func ExecutePasses(projectPath string,
+	packagePattern string,
+	rootFunctions []FuncDescriptor,
+	funcDecls map[FuncDescriptor]bool,
+	backwardCallGraph map[FuncDescriptor][]FuncDescriptor) {
+
+	PropagateContext(projectPath,
+		packagePattern,
+		backwardCallGraph,
+		rootFunctions,
+		funcDecls,
+		"")
+
+	Instrument(projectPath,
+		packagePattern,
+		"",
+		backwardCallGraph,
+		rootFunctions,
+		"")
 }

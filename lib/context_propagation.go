@@ -30,9 +30,15 @@ func PropagateContext(projectPath string,
 		fmt.Println("\t", pkg)
 
 		for _, node := range pkg.Syntax {
+			var out *os.File
 			fmt.Println("\t\t", fset.File(node.Pos()).Name())
-			out, _ := os.Create(fset.File(node.Pos()).Name() + passFileSuffix)
-			defer out.Close()
+			if len(passFileSuffix) > 0 {
+				out, _ = os.Create(fset.File(node.Pos()).Name() + passFileSuffix)
+				defer out.Close()
+			} else {
+				out, _ = os.Create(fset.File(node.Pos()).Name() + "ir_context")
+				defer out.Close()
+			}
 
 			if len(rootFunctions) == 0 {
 				printer.Fprint(out, fset, node)
@@ -154,7 +160,11 @@ func PropagateContext(projectPath string,
 				return true
 			})
 			printer.Fprint(out, fset, node)
-			os.Rename(fset.File(node.Pos()).Name(), fset.File(node.Pos()).Name()+".original")
+			if len(passFileSuffix) > 0 {
+				os.Rename(fset.File(node.Pos()).Name(), fset.File(node.Pos()).Name()+".original")
+			} else {
+				os.Rename(fset.File(node.Pos()).Name()+"ir_context", fset.File(node.Pos()).Name())
+			}
 		}
 	}
 }
