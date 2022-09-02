@@ -39,9 +39,11 @@ specific package as well
 There are few passes during execution. 
 1. Search for entry point, a function definition with ```AutotelEntryPoint__()``` call.
 2. Building call graph. Traversing all calls from entry point through all function definitions.
-3. Context propagation. Adding additional context parameter to all function declarations and function call expressions that are visible
+3. Injecting open telemetry calls into functions bodies. (The order of 3 and 4 has been changed and now injecting open telemetry calls pass
+   is before context propagation due to fact of changing type signatures by context propagation)
+4. Context propagation. Adding additional context parameter to all function declarations and function call expressions that are visible
    (it will not add context argument to call expression without having visible function declaration).
-4. Injecting open telemetry calls into functions bodies.
+
 
 ![image info](./sets.png)
 
@@ -52,4 +54,4 @@ This project is actively maintained by Sumo Logic and is currently in it's initi
 We welcome issues, questions, and pull requests.
 
 ## License
-This project is licensed under the terms of the MIT license. Please refer to LICENSE for the full terms.
+This project is licensed under the terms of the Apache 2.0 open source license. Please refer to LICENSE for the full terms.

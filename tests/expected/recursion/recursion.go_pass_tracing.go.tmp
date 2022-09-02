@@ -15,12 +15,19 @@
 package main
 
 import (
-	"fmt"
-	"context"
-
 	"github.com/pdelewski/autotel/rtlib"
 	otel "go.opentelemetry.io/otel"
+	"context"
 )
+
+func recur(n int) {
+	__child_tracing_ctx, span := otel.Tracer("recur").Start(__tracing_ctx, "recur")
+	_ = __child_tracing_ctx
+	defer span.End()
+	if n > 0 {
+		recur(n - 1)
+	}
+}
 
 func main() {
 	__child_tracing_ctx := context.TODO()
@@ -32,5 +39,5 @@ func main() {
 	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
 	defer span.End()
 	rtlib.AutotelEntryPoint__()
-	fmt.Println(FibonacciHelper(__child_tracing_ctx, 10))
+	recur(5)
 }

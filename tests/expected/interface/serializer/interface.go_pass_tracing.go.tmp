@@ -12,25 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package serializer
 
-import (
-	"fmt"
-	"context"
-
-	"github.com/pdelewski/autotel/rtlib"
-	otel "go.opentelemetry.io/otel"
-)
-
-func main() {
-	__child_tracing_ctx := context.TODO()
-	_ = __child_tracing_ctx
-	ts := rtlib.NewTracingState()
-	defer rtlib.Shutdown(ts)
-	otel.SetTracerProvider(ts.Tp)
-	ctx := context.Background()
-	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
-	defer span.End()
-	rtlib.AutotelEntryPoint__()
-	fmt.Println(FibonacciHelper(__child_tracing_ctx, 10))
+type Serializer interface {
+	Serialize()
 }

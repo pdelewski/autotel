@@ -1,3 +1,17 @@
+// Copyright The OpenTelemetry Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package lib
 
 import (
@@ -7,7 +21,6 @@ import (
 	"go/token"
 	"log"
 	"os"
-	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
@@ -15,7 +28,6 @@ import (
 
 func Instrument(projectPath string,
 	packagePattern string,
-	file string,
 	callgraph map[FuncDescriptor][]FuncDescriptor,
 	rootFunctions []FuncDescriptor,
 	passFileSuffix string) {
@@ -29,23 +41,24 @@ func Instrument(projectPath string,
 	}
 	for _, pkg := range pkgs {
 		fmt.Println("\t", pkg)
+		var node *ast.File
+		for _, node = range pkg.Syntax {
+			addImports := false
+			addContext := false
 
-		for _, node := range pkg.Syntax {
 			var out *os.File
 			fmt.Println("\t\t", fset.File(node.Pos()).Name())
 			if len(passFileSuffix) > 0 {
 				out, _ = os.Create(fset.File(node.Pos()).Name() + passFileSuffix)
 				defer out.Close()
 			} else {
-				out, _ = os.Create(fset.File(node.Pos()).Name() + "ir_instr")
+				out, _ = os.Create(fset.File(node.Pos()).Name() + "ir_context")
 				defer out.Close()
 			}
 			if len(rootFunctions) == 0 {
 				printer.Fprint(out, fset, node)
 				continue
 			}
-			astutil.AddImport(fset, node, "context")
-			astutil.AddNamedImport(fset, node, "otel", "go.opentelemetry.io/otel")
 
 			childTracingTodo := &ast.AssignStmt{
 				Lhs: []ast.Expr{
@@ -86,20 +99,22 @@ func Instrument(projectPath string,
 			ast.Inspect(node, func(n ast.Node) bool {
 				switch x := n.(type) {
 				case *ast.FuncDecl:
-					fun := FuncDescriptor{pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String()}
-					// that's kind a trick
-					// context propagation pass adds additional context parameter
-					// this additional parameter has to be removed to match
-					// what's already in function callgraph
-					fun.DeclType = strings.ReplaceAll(fun.DeclType, "(__tracing_ctx context.Context", "(")
-					fun.DeclType = strings.ReplaceAll(fun.DeclType, ", __tracing_ctx context.Context", "")
+					pkgPath := ""
 
+					if x.Recv != nil {
+						pkgPath = GetPackagePathHashFromFunc(pkg, pkgs, x)
+					} else {
+						pkgPath = GetPkgNameFromDefsTable(pkg, x.Name)
+					}
+					fundId := pkgPath + "." + pkg.TypesInfo.Defs[x.Name].Name()
+					fun := FuncDescriptor{fundId, pkg.TypesInfo.Defs[x.Name].Type().String()}
 					// check if it's root function or
 					// one of function in call graph
 					// and emit proper ast nodes
 					_, exists := callgraph[fun]
 					if !exists {
 						if !Contains(rootFunctions, fun) {
+							addContext = true
 							x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
 							return false
 						}
@@ -107,8 +122,7 @@ func Instrument(projectPath string,
 
 					for _, root := range rootFunctions {
 						visited := map[FuncDescriptor]bool{}
-
-						fmt.Println("\t\t\tFuncDecl:", pkg.TypesInfo.Defs[x.Name].Id(), pkg.TypesInfo.Defs[x.Name].Type().String())
+						fmt.Println("\t\t\tFuncDecl:", fundId, pkg.TypesInfo.Defs[x.Name].Type().String())
 						if isPath(callgraph, fun, root, visited) && fun.TypeHash() != root.TypeHash() {
 							s1 := &ast.ExprStmt{
 								X: &ast.CallExpr{
@@ -207,10 +221,13 @@ func Instrument(projectPath string,
 							}
 							_ = s1
 							x.Body.List = append([]ast.Stmt{s2, s3, s4}, x.Body.List...)
+							addContext = true
+							addImports = true
 						} else {
 							// check whether this function is root function
 							if !Contains(rootFunctions, fun) {
 								x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
+								addContext = true
 								return false
 							}
 							s1 := &ast.ExprStmt{
@@ -389,6 +406,8 @@ func Instrument(projectPath string,
 							_ = s1
 							x.Body.List = append([]ast.Stmt{s2, s3, s4, s5, s6, s8}, x.Body.List...)
 							x.Body.List = append([]ast.Stmt{childTracingTodo, childTracingSupress}, x.Body.List...)
+							addContext = true
+							addImports = true
 
 						}
 					}
@@ -490,15 +509,29 @@ func Instrument(projectPath string,
 					}
 					_ = s1
 					x.Body.List = append([]ast.Stmt{s2, s3, s4}, x.Body.List...)
+					addImports = true
+					addContext = true
 				}
+
 				return true
 			})
+			if addContext {
+				if !astutil.UsesImport(node, "context") {
+					astutil.AddImport(fset, node, "context")
+				}
+			}
+			if addImports {
+				if !astutil.UsesImport(node, "go.opentelemetry.io/otel") {
+					astutil.AddNamedImport(fset, node, "otel", "go.opentelemetry.io/otel")
+				}
+			}
 			printer.Fprint(out, fset, node)
 			if len(passFileSuffix) > 0 {
-				os.Rename(fset.File(node.Pos()).Name(), fset.File(node.Pos()).Name()+".tmp")
+				os.Rename(fset.File(node.Pos()).Name(), fset.File(node.Pos()).Name()+".original")
 			} else {
-				os.Rename(fset.File(node.Pos()).Name()+"ir_instr", fset.File(node.Pos()).Name())
+				os.Rename(fset.File(node.Pos()).Name()+"ir_context", fset.File(node.Pos()).Name())
 			}
 		}
+
 	}
 }

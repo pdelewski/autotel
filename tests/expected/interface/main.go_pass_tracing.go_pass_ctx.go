@@ -15,11 +15,11 @@
 package main
 
 import (
-	"fmt"
-	"context"
-
-	"github.com/pdelewski/autotel/rtlib"
+	. "github.com/SumoLogic-Labs/autotel/tests/interface/app"
 	otel "go.opentelemetry.io/otel"
+	"context"
+	. "github.com/SumoLogic-Labs/autotel/tests/interface/serializer"
+	"github.com/pdelewski/autotel/rtlib"
 )
 
 func main() {
@@ -31,6 +31,10 @@ func main() {
 	ctx := context.Background()
 	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
 	defer span.End()
+
 	rtlib.AutotelEntryPoint__()
-	fmt.Println(FibonacciHelper(__child_tracing_ctx, 10))
+	bs := BasicSerializer{}
+	var s Serializer
+	s = bs
+	s.Serialize(__child_tracing_ctx)
 }

@@ -20,7 +20,7 @@ import (
 	otel "go.opentelemetry.io/otel"
 )
 
-func foo(__tracing_ctx context.Context) {
+func foo(__tracing_ctx context.Context,) {
 	__child_tracing_ctx, span := otel.Tracer("foo").Start(__tracing_ctx, "foo")
 	_ = __child_tracing_ctx
 	defer span.End()
@@ -31,7 +31,7 @@ func FibonacciHelper(__tracing_ctx context.Context, n uint) (uint64, error) {
 	__child_tracing_ctx, span := otel.Tracer("FibonacciHelper").Start(__tracing_ctx, "FibonacciHelper")
 	_ = __child_tracing_ctx
 	defer span.End()
-	func(__tracing_ctx context.Context) {
+	func(__tracing_ctx context.Context,) {
 		__child_tracing_ctx, span := otel.Tracer("anonymous").Start(__tracing_ctx, "anonymous")
 		_ = __child_tracing_ctx
 		defer span.End()

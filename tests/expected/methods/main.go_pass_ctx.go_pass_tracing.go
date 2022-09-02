@@ -14,33 +14,33 @@ type driver struct {
 }
 
 type i interface {
-	foo(p int, __tracing_ctx context.Context) int
+	foo(__tracing_ctx context.Context, p int) int
 }
 
 type impl struct {
 }
 
-func (i impl) foo(p int, __tracing_ctx context.Context) int {
+func (i impl) foo(__tracing_ctx context.Context, p int) int {
 	__child_tracing_ctx, span := otel.Tracer("foo").Start(__tracing_ctx, "foo")
 	_ = __child_tracing_ctx
 	defer span.End()
 	return 5
 }
 
-func foo(p int, __tracing_ctx context.Context) int {
+func foo(__tracing_ctx context.Context, p int) int {
 	__child_tracing_ctx, span := otel.Tracer("foo").Start(__tracing_ctx, "foo")
 	_ = __child_tracing_ctx
 	defer span.End()
 	return 1
 }
 
-func (d driver) process(a int, __tracing_ctx context.Context) {
+func (d driver) process(__tracing_ctx context.Context, a int) {
 	__child_tracing_ctx, span := otel.Tracer("process").Start(__tracing_ctx, "process")
 	_ = __child_tracing_ctx
 	defer span.End()
 }
 
-func (e element) get(a int, __tracing_ctx context.Context) {
+func (e element) get(__tracing_ctx context.Context, a int) {
 	__child_tracing_ctx, span := otel.Tracer("get").Start(__tracing_ctx, "get")
 	_ = __child_tracing_ctx
 	defer span.End()
@@ -57,9 +57,9 @@ func main() {
 	defer span.End()
 	rtlib.AutotelEntryPoint__()
 	d := driver{}
-	d.process(10, __child_tracing_ctx)
-	d.e.get(5, __child_tracing_ctx)
+	d.process(__child_tracing_ctx, 10)
+	d.e.get(__child_tracing_ctx, 5)
 	var in i
 	in = impl{}
-	in.foo(10, __child_tracing_ctx)
+	in.foo(__child_tracing_ctx, 10)
 }

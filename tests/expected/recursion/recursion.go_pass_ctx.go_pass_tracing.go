@@ -6,12 +6,12 @@ import (
 	"context"
 )
 
-func recur(n int, __tracing_ctx context.Context) {
+func recur(__tracing_ctx context.Context, n int) {
 	__child_tracing_ctx, span := otel.Tracer("recur").Start(__tracing_ctx, "recur")
 	_ = __child_tracing_ctx
 	defer span.End()
 	if n > 0 {
-		recur(n-1, __child_tracing_ctx)
+		recur(__child_tracing_ctx, n-1)
 	}
 }
 
@@ -25,5 +25,5 @@ func main() {
 	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
 	defer span.End()
 	rtlib.AutotelEntryPoint__()
-	recur(5, __child_tracing_ctx)
+	recur(__child_tracing_ctx, 5)
 }

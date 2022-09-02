@@ -23,15 +23,15 @@ func foo(__tracing_ctx context.Context,) {
 	fmt.Println("foo")
 }
 
-func FibonacciHelper(n uint, __tracing_ctx context.Context,) (uint64, error) {
+func FibonacciHelper(__tracing_ctx context.Context, n uint) (uint64, error) {
 	func(__tracing_ctx context.Context,) {
 		foo(__child_tracing_ctx)
 	}(__child_tracing_ctx)
-	return Fibonacci(n, __child_tracing_ctx)
+	return Fibonacci(__child_tracing_ctx, n)
 }
 
 // Fibonacci returns the n-th fibonacci number.
-func Fibonacci(n uint, __tracing_ctx context.Context,) (uint64, error) {
+func Fibonacci(__tracing_ctx context.Context, n uint) (uint64, error) {
 	if n <= 1 {
 		return uint64(n), nil
 	}

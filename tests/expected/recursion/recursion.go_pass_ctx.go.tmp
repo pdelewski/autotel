@@ -5,13 +5,13 @@ import (
 	"context"
 )
 
-func recur(n int, __tracing_ctx context.Context) {
+func recur(__tracing_ctx context.Context, n int) {
 	if n > 0 {
-		recur(n-1, __child_tracing_ctx)
+		recur(__child_tracing_ctx, n-1)
 	}
 }
 
 func main() {
 	rtlib.AutotelEntryPoint__()
-	recur(5, __child_tracing_ctx)
+	recur(__child_tracing_ctx, 5)
 }

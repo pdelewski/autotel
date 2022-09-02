@@ -14,23 +14,26 @@
 
 package main
 
-import (
-	"fmt"
-	"context"
+import "github.com/pdelewski/autotel/rtlib"
 
-	"github.com/pdelewski/autotel/rtlib"
-	otel "go.opentelemetry.io/otel"
-)
+type Driver interface {
+	Foo(i int)
+}
+
+type Impl struct {
+}
+
+func (impl Impl) Foo(i int) {
+
+}
 
 func main() {
-	__child_tracing_ctx := context.TODO()
-	_ = __child_tracing_ctx
-	ts := rtlib.NewTracingState()
-	defer rtlib.Shutdown(ts)
-	otel.SetTracerProvider(ts.Tp)
-	ctx := context.Background()
-	__child_tracing_ctx, span := otel.Tracer("main").Start(ctx, "main")
-	defer span.End()
 	rtlib.AutotelEntryPoint__()
-	fmt.Println(FibonacciHelper(__child_tracing_ctx, 10))
+	a := []Driver{
+		Impl{},
+	}
+	var d Driver
+	d = Impl{}
+	d.Foo(3)
+	a[0].Foo(4)
 }
